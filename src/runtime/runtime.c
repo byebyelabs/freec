@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "log.h"
 
 // Citation: https://arc.net/l/quote/tmdpqzak
 void* real_malloc(size_t size) {
@@ -26,11 +27,11 @@ void real_free(void* ptr) {
 }
 
 void* malloc(size_t size) {
-  printf("malloc called: malloc(%zu)\n", size);
+  log_message("malloc called: malloc(zu)\n");
   return real_malloc(size);
 }
 
 void free(void* ptr) {
-  printf("free called: free(%p)\n", ptr);
+  log_message("free called: free(p)\n");
   real_free(ptr);
 }
