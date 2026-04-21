@@ -1,0 +1,6 @@
+.DS_Store
+build/
+*.o
+*.a
+*.dSYM/
+compile_commands.json
