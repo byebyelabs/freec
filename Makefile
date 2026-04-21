@@ -18,8 +18,8 @@ all:
 	$(CC) $(CFLAGS) -shared -fPIC -o $(BUILD_DIR)/$(LIB).so $(BUILD_SRC) -ldl
 
 test/double_free:
-	$(CC) $(CFLAGS) -o tests/double_free_basic tests/double_free_basic.c
-	@LD_PRELOAD=./$(BUILD_DIR)/$(LIB).so ./tests/double_free_basic || true
+	$(CC) $(CFLAGS) -o tests/exe_double_free_basic tests/double_free_basic.c
+	@LD_PRELOAD=./$(BUILD_DIR)/$(LIB).so ./tests/exe_double_free_basic || true
 
 format:
 	$(FORMATTER) -i $(SOURCES)

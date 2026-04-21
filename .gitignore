@@ -4,3 +4,4 @@ build/
 *.a
 *.dSYM/
 compile_commands.json
+tests/exe_*
