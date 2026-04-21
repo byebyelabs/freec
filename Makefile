@@ -17,7 +17,7 @@ all:
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -shared -fPIC -o $(BUILD_DIR)/$(LIB).so $(BUILD_SRC) -ldl
 
-test/double_free:
+tests/double_free_basic:
 	$(CC) $(CFLAGS) -o tests/exe_double_free_basic tests/double_free_basic.c
 	@LD_PRELOAD=./$(BUILD_DIR)/$(LIB).so ./tests/exe_double_free_basic || true
 
