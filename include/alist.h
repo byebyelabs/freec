@@ -22,12 +22,25 @@ typedef struct alloc_node {
 
 
 // TODO: add documentation
-void fill_trace_info(alloc_node_t* node, trace_event_t event_type);
-void dump_trace_info(alloc_node_t* node);
+void _fill_trace_info(alloc_node_t* node, trace_event_t event_type);
+
+// TODO: add documentation
+void _dump_error_info(alloc_node_t* node);
+
 
 // TODO: add documentation
 void add_alloc_event(void* mem_ptr, size_t block_sz);
+
+// TODO: add documentation
+// IF:
+//  - LAST EVENT == "FREE": "use after free"
+//  - NODE == NONE:         "use before malloc"
+// 
 void add_deref_event(void* mem_ptr);
+
+// TODO: add documentation
+// IF:
+//  - LAST EVENT == "FREE": "double free"
 void add_freed_event(void* mem_ptr);
 
 #endif
