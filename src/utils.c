@@ -1,5 +1,24 @@
-#include "runtime.h"
-#include "log.h"
+#include "utils.h"
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void log_message(char *message) {
+  // Get the message length
+  size_t len = 0;
+  while (message[len] != '\0') {
+    len++;
+  }
+
+  // Write the message
+  if ((size_t)write(STDERR_FILENO, message, len) != len) {
+    // Write failed. Try to write an error message, then exit
+    char fail_msg[] = "logging failed\n";
+    write(STDERR_FILENO, fail_msg, sizeof(fail_msg));
+    exit(2);
+  }
+}
 
 // Citation: https://arc.net/l/quote/tmdpqzak
 void* real_malloc(size_t size) {
@@ -24,14 +43,4 @@ void real_free(void* ptr) {
   }
 
   real_fn(ptr);
-}
-
-void* malloc(size_t size) {
-  log_message("malloc called: malloc(zu)\n");
-  return real_malloc(size);
-}
-
-void free(void* ptr) {
-  log_message("free called: free(p)\n");
-  real_free(ptr);
 }
