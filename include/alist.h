@@ -1,3 +1,6 @@
+// tracing and allocation-list header file
+// need both in one place because of codependency
+
 #ifndef ALIST_T
 #define ALIST_T 1
 
@@ -22,10 +25,13 @@ typedef struct alloc_node {
   trace_info_t last_event;
 } alloc_node_t;
 
-// TODO: add documentation
+// Adds trace info to given node with given event type
+// \param node        pointer to the node to fill
+// \param event_type  the type of event to fill in the node's last_event field
 void _fill_trace_info(alloc_node_t *node, trace_event_t event_type);
 
-// TODO: add documentation
+// Dumps error information for the given node
+// \param node        pointer to the node for which to dump error info
 void _dump_error_info(alloc_node_t *node);
 
 // TODO: add documentation
