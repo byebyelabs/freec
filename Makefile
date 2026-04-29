@@ -35,6 +35,9 @@ tests/use_after_free:
 tests/invalid_free:
 	@python3 tests "tests/invalid_free_*"
 
+tests/memory_leak:
+	@python3 tests "tests/memory_leak_*"
+
 format:
 	$(FORMATTER) -i $(SOURCES)
 
