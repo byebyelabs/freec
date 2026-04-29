@@ -21,7 +21,7 @@ void log_message(char *message) {
 }
 
 // Citation: https://arc.net/l/quote/tmdpqzak
-void* real_malloc(size_t size) {
+void *real_malloc(size_t size) {
   static malloc_fn_t real_fn = NULL;
   if (real_fn == NULL) {
     real_fn = (malloc_fn_t)dlsym(RTLD_NEXT, "malloc");
@@ -33,7 +33,7 @@ void* real_malloc(size_t size) {
   return real_fn(size);
 }
 
-void real_free(void* ptr) {
+void real_free(void *ptr) {
   static free_fn_t real_fn = NULL;
   if (real_fn == NULL) {
     real_fn = (free_fn_t)dlsym(RTLD_NEXT, "free");
