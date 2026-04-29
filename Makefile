@@ -32,6 +32,9 @@ tests/double_free:
 tests/use_after_free:
 	@python3 tests "tests/use_after_free_*"
 
+tests/invalid_free:
+	@python3 tests "tests/invalid_free_*"
+
 format:
 	$(FORMATTER) -i $(SOURCES)
 
