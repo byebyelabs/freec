@@ -1,6 +1,8 @@
 #ifndef ALIST_T
 #define ALIST_T 1
 
+#include <stdlib.h>
+
 #define MAX_PATH_BUFF 256 /* including \0 */
 
 typedef int ln_num_t;
@@ -8,7 +10,7 @@ typedef enum { ALLOC, FREE, DEREF } trace_event_t;
 
 typedef struct {
   ln_num_t line;
-  char[MAX_PATH_BUFF] file_path;
+  char file_path[MAX_PATH_BUFF];
   trace_event_t event;
 } trace_info_t;
 
