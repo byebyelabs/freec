@@ -7,7 +7,7 @@ BUILD_SRC = src/runtime.c src/utils.c
 BUILD_DIR = build
 
 FORMATTER = clang-format
-SOURCES = $(shell find . -o -name "*.c" -o -name "*.h")
+SOURCES = $(shell find . -name "*.c" -o -name "*.h")
 
 LAB = byebye
 PRJ = freec
