@@ -2,7 +2,7 @@
 
 void *malloc(size_t size) {
   // TODO: malloc a page
-  log_message("malloc called: malloc(zu)\n");
+  log_message(DEBUG, "malloc called: malloc(zu)\n");
   return real_malloc(size);
 }
 

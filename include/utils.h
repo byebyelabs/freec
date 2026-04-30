@@ -17,6 +17,7 @@ void real_free(void *ptr);
  * \param message   A null-terminated string that contains the message to be
  * printed
  */
-void log_message(char *message);
+typedef enum { DEBUG, WARNING, ERROR } severity_t;
+void log_message(char *message, severity_t severity);
 
 #endif

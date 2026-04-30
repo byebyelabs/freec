@@ -4,7 +4,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void log_message(char *message) {
+severity_t LOG_SEVERITY = DEBUG;
+
+void log_message(char *message, severity_t severity) {
+  if (severity < LOG_SEVERITY) {
+    return;
+  }
+
   // Get the message length
   size_t len = 0;
   while (message[len] != '\0') {
