@@ -24,7 +24,7 @@ void _fill_trace_info(alloc_node_t *node, trace_event_t event_type) {
   for (size_t i = 0; i < count; i++) {
     char funcName[1024];
     snprintf(funcName, sizeof(funcName), "%s\n", funcNames[i]);
-    log_message(funcName);
+    log_message(funcName, DEBUG);
   }
 
   free(funcNames);
