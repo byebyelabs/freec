@@ -3,7 +3,7 @@
 CC        = clang
 CFLAGS    = -std=c11 -Wall -Wextra -Wpedantic -O0 -Iinclude
 
-BUILD_SRC = src/runtime.c src/utils.c
+BUILD_SRC = src/runtime.c src/utils.c src/tracing.c src/alist.c
 BUILD_DIR = build
 
 FORMATTER = clang-format
