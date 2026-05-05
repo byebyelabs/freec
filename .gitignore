@@ -4,6 +4,8 @@ build/
 *.a
 *.dSYM/
 compile_commands.json
+# use absolute paths with .clangd
+.clangd
 tests/exe_*
 compile_flags.txt
 
