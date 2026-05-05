@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "alist.h"
+#include "runtime.h"
 #include "utils.h"
 
 #define TRACE_DEPTH 32
@@ -22,9 +23,10 @@ void _fill_trace_info(alloc_node_t *node, trace_event_t event_type) {
   void *traces[TRACE_DEPTH];
   size_t count = backtrace(traces, TRACE_DEPTH);
 
-  // backtrace_symbols makes a malloc call, which is why I added
-  // `CURRENTLY_IN_MALLOC` flag to avoid a recursive call
+  // backtrace_symbols makes a malloc call
+  set_route_custom_malloc_to_real_malloc();
   char **funcNames = backtrace_symbols(traces, count);
+  unset_route_custom_malloc_to_real_malloc();
 
   for (size_t i = 0; i < count; i++) {
     char funcName[1024];

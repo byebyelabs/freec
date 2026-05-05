@@ -1,22 +1,24 @@
+#include "runtime.h"
 #include "utils.h"
 
-int USER_CURRENTLY_IN_MALLOC = 0;
+int ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
+
+void set_route_custom_malloc_to_real_malloc(void) {
+    ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 1;
+}
+
+void unset_route_custom_malloc_to_real_malloc(void) {
+    ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
+}
 
 void *malloc(size_t size) {
-  if (USER_CURRENTLY_IN_MALLOC) {
-    // something made a recursive call to malloc.
-    // it must be our own code/libs we use. make real malloc call.
+  if (ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC) {
     return real_malloc(size);
   }
-
-  // malloc has started
-  USER_CURRENTLY_IN_MALLOC = 1;
 
   // TODO: malloc a page
   log_message("malloc called: malloc(zu)\n", DEBUG);
 
-  // malloc has finished
-  USER_CURRENTLY_IN_MALLOC = 0;
   return real_malloc(size);
 }
 
