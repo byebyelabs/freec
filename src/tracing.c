@@ -7,14 +7,20 @@
 
 #define TRACE_DEPTH 32
 
-void _fill_trace_info(alloc_node_t *node, trace_event_t event_type) {
+// Number of places to go back so the recorded loc points at
+// user code
+#define BACKTRACE_SKIP 3
+
+void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   log_message("[tracing]: _fill_trace_info called\n", DEBUG);
-  if (node == NULL) {
-    log_message("[tracing]: should be unreachable! node is `null`\n", ERROR);
+  if (info == NULL) {
+    log_message("[tracing]: should be unreachable! info is `null`\n", ERROR);
     exit(EXIT_FAILURE);
   }
 
-  // node->last_event.event = event_type;
+  info->event = event_type;
+  info->line = 0;
+  info->file_path[0] = '\0';
 
   // Citation:
   //    https://man7.org/linux/man-pages/man3/backtrace.3.html
@@ -22,22 +28,29 @@ void _fill_trace_info(alloc_node_t *node, trace_event_t event_type) {
   //    https://www.geeksforgeeks.org/c/pipe-system-call/
   void *traces[TRACE_DEPTH];
   size_t count = backtrace(traces, TRACE_DEPTH);
+  if (count == 0) { return; }
 
   // backtrace_symbols makes a malloc call
   set_route_custom_malloc_to_real_malloc();
   char **funcNames = backtrace_symbols(traces, count);
   unset_route_custom_malloc_to_real_malloc();
 
-  for (size_t i = 0; i < count; i++) {
-    char funcName[1024];
-    snprintf(funcName, sizeof(funcName), "%s\n", funcNames[i]);
-    log_message(funcName, DEBUG);
-  }
+  if (funcNames == NULL) { return; }
+
+  size_t user_code_loc =
+      (count > BACKTRACE_SKIP) ? BACKTRACE_SKIP : count - 1;
+  snprintf(info->file_path, sizeof(info->file_path), "%s",
+           funcNames[user_code_loc]);
+
+  log_message("[tracing]: filled trace location: ", DEBUG);
+  log_message(info->file_path, DEBUG);
+  log_message("\n", DEBUG);
 
   real_free(funcNames);
 }
 
 void _dump_error_info(alloc_node_t *node) {
-  if (node == NULL)
-    return;
+  if (node == NULL) { return; }
+
+  log_message("[tracing]: _dump_error_info needs to dump here\n", DEBUG);
 }
