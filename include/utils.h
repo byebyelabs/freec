@@ -10,8 +10,6 @@
 #include <sys/mman.h>
 #include <stdint.h>
 
-#include "alist.h"
-
 typedef void *(*malloc_fn_t)(size_t size);
 typedef void (*free_fn_t)(void *ptr);
 
@@ -23,12 +21,13 @@ void real_free(void *ptr);
  * \param message   A null-terminated string that contains the message to be
  * printed
  */
-void log_message(char *message);
+typedef enum { DEBUG, WARNING, ERROR } severity_t;
+void log_message(char *message, severity_t severity);
 
 typedef long page_size_t;
 /**
  * Get the page size.
  */
-page_size_t get_page_size();
+page_size_t get_page_size(void);
 
 #endif

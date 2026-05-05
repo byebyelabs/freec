@@ -5,14 +5,20 @@
 #include <unistd.h>
 
 page_size_t _PAGE_SIZE = -1;
-page_size_t get_page_size() {
+page_size_t get_page_size(void) {
   if (_PAGE_SIZE == -1) {
     _PAGE_SIZE = sysconf(_SC_PAGESIZE);
   }
   return _PAGE_SIZE;
 }
 
-void log_message(char *message) {
+severity_t LOG_SEVERITY = DEBUG;
+
+void log_message(char *message, severity_t severity) {
+  if (severity < LOG_SEVERITY) {
+    return;
+  }
+
   // Get the message length
   size_t len = 0;
   while (message[len] != '\0') {
