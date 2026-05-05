@@ -19,12 +19,11 @@ void unset_route_custom_malloc_to_real_malloc(void) {
 }
 
 void *malloc(size_t size) {
-  log_message("malloc called: malloc(zu)\n", DEBUG);
-  
   if (ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC) {
     return real_malloc(size);
   }
-  
+
+  log_message("malloc called: malloc(zu)\n", DEBUG);
   if (u_page_start == NULL) {
     // if no underlying page
     log_message("making new page\n", DEBUG);
@@ -45,11 +44,15 @@ void *malloc(size_t size) {
   void* v_addr = (uint8_t*) v_page_start + offset;
   offset += size;
   add_alloc_event(v_addr, size);
-  
+
   return v_addr;
 }
 
 void free(void *ptr) {
+  if (ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC) {
+    real_free(ptr);
+    return;
+  }
   log_message("free called: free(p)\n", DEBUG);
   add_freed_event(ptr);
   // if we have gotten past add freed event, we can freely mprotect

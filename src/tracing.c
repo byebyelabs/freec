@@ -27,11 +27,14 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   //    https://stackoverflow.com/a/5946948,
   //    https://www.geeksforgeeks.org/c/pipe-system-call/
   void *traces[TRACE_DEPTH];
-  size_t count = backtrace(traces, TRACE_DEPTH);
-  if (count == 0) { return; }
-
-  // backtrace_symbols makes a malloc call
+  // both backtrace funcs make a malloc call
   set_route_custom_malloc_to_real_malloc();
+  size_t count = backtrace(traces, TRACE_DEPTH);
+  if (count == 0) {
+    unset_route_custom_malloc_to_real_malloc();
+    return;
+  }
+
   char **funcNames = backtrace_symbols(traces, count);
   unset_route_custom_malloc_to_real_malloc();
 

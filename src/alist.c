@@ -2,6 +2,7 @@
 #include "utils.h"
 
 #include <pthread.h>
+#include <unistd.h>
 
 static alloc_node_t *alloc_list_head = NULL;
 static pthread_mutex_t alloc_list_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -45,12 +46,14 @@ void add_deref_event(void *mem_ptr) {
   // use before malloc error
   if (node == NULL) {
     log_message("Use Before Malloc Error!\n", ERROR);
+    _dump_error_info(node);
     exit(1);
   }
 
   // use after free error
   if (node->last_event.event == FREE) {
     log_message("Use After Free Error!\n", ERROR);
+    _dump_error_info(node);
     exit(1);
   }
 
@@ -63,15 +66,20 @@ void add_freed_event(void *mem_ptr) {
   alloc_node_t *node = NULL;
   _find_node(mem_ptr, &node, true);
 
+  alloc_node_t *start_node = NULL;
+  _find_node(mem_ptr, &start_node, false);
+
   // invalid free error
   if (node == NULL) {
     log_message("Invalid Free Error!\n", ERROR);
+    _dump_error_info(start_node);
     exit(1);
   }
 
   // double free error
   if (node->last_event.event == FREE) {
     log_message("Double Free Error!\n", ERROR);
+    _dump_error_info(node);
     exit(1);
   }
 
