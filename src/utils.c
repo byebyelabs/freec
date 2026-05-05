@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 page_size_t _PAGE_SIZE = -1;
-page_size_t get_page_size() {
+page_size_t get_page_size(void) {
   if (_PAGE_SIZE == -1) {
     _PAGE_SIZE = sysconf(_SC_PAGESIZE);
   }
