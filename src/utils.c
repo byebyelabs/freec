@@ -4,6 +4,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+page_size_t _PAGE_SIZE = -1;
+page_size_t get_page_size() {
+  if (_PAGE_SIZE == -1) {
+    _PAGE_SIZE = sysconf(_SC_PAGESIZE);
+  }
+  return _PAGE_SIZE;
+}
+
 severity_t LOG_SEVERITY = DEBUG;
 
 void log_message(char *message, severity_t severity) {

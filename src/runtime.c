@@ -1,5 +1,10 @@
-#include "runtime.h"
+#include "alist.h"
 #include "utils.h"
+
+// TODO: make it possible to have more pages
+// underlying page
+void* u_page_start = NULL;
+size_t offset = 0;
 
 int ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
 
@@ -12,20 +17,44 @@ void unset_route_custom_malloc_to_real_malloc(void) {
 }
 
 void *malloc(size_t size) {
+  log_message("malloc called: malloc(zu)\n", DEBUG);
+  
   if (ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC) {
     return real_malloc(size);
   }
+  
+  if (u_page_start == NULL) {
+    // if no underlying page
+    log_message("making new page\n", DEBUG);
+    u_page_start = mmap(NULL, get_page_size(), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+    if (u_page_start == MAP_FAILED) {
+      perror("!! Failed to mmap underlying page!");
+      exit(EXIT_FAILURE);
+    }
+  }
 
-  // TODO: malloc a page
-  log_message("malloc called: malloc(zu)\n", DEBUG);
+  // make virtual page
+  void* v_page_start = mremap((uint8_t*) u_page_start + offset, 0, get_page_size(), MREMAP_MAYMOVE);
+  if (v_page_start == MAP_FAILED) {
+    perror("!! Failed to make virtual address!");
+  }
 
-  return real_malloc(size);
+  // construct virtual address
+  void* v_addr = (uint8_t*) v_page_start + offset;
+  offset += size;
+  add_alloc_event(v_addr, size);
+  
+  return v_addr;
 }
 
 void free(void *ptr) {
   log_message("free called: free(p)\n", DEBUG);
-  real_free(ptr);
-  // TODO: instead of freeing, protect page
+  add_freed_event(ptr);
+  // if we have gotten past add freed event, we can freely mprotect
+  char buffer[100];
+  sprintf(buffer, "valid free of %p!\n", ptr);
+  log_message(buffer, DEBUG);
+  mprotect(ptr, get_page_size(), PROT_NONE);
 }
 
 // void protected_page_access_handler(??) {
