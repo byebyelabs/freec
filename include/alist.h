@@ -4,6 +4,7 @@
 #ifndef ALIST_T
 #define ALIST_T 1
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #define MAX_PATH_BUFF 256 /* including \0 */
@@ -33,6 +34,9 @@ void _fill_trace_info(alloc_node_t *node, trace_event_t event_type);
 // Dumps error information for the given node
 // \param node        pointer to the node for which to dump error info
 void _dump_error_info(alloc_node_t *node);
+
+// TODO: add documentation
+void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match);
 
 // TODO: add documentation
 void add_alloc_event(void *mem_ptr, size_t block_sz);

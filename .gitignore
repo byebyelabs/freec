@@ -5,5 +5,6 @@ build/
 *.dSYM/
 compile_commands.json
 tests/exe_*
+compile_flags.txt
 
 __pycache__/

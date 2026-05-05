@@ -1,7 +1,7 @@
 .PHONY: all clean tests
 
 CC        = clang
-CFLAGS    = -std=c11 -Wall -Wextra -Wpedantic -O0 -Iinclude
+CFLAGS    = -std=c11 -Wall -Wextra -Wpedantic -O0 -Iinclude -pthread
 
 BUILD_SRC = src/runtime.c src/utils.c src/tracing.c src/alist.c
 BUILD_DIR = build
