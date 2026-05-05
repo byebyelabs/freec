@@ -1,6 +1,8 @@
 #include "alist.h"
 #include "utils.h"
 
+#include "tracing.c"
+
 #include <pthread.h>
 
 static alloc_node_t *alloc_list_head = NULL;
@@ -77,14 +79,6 @@ void add_freed_event(void *mem_ptr) {
 
   // fill trace info (last event == this event)
   _fill_trace_info(&node->last_event, FREE);
-}
-
-void _fill_trace_info(trace_info_t *node, trace_event_t event_type) {
-  // TODO
-}
-
-void _dump_error_info(trace_info_t *node) {
-  // TODO
 }
 
 void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match) {
