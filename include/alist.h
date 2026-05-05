@@ -26,10 +26,11 @@ typedef struct alloc_node {
   trace_info_t last_event;
 } alloc_node_t;
 
-// Adds trace info to given node with given event type
-// \param node        pointer to the node to fill
-// \param event_type  the type of event to fill in the node's last_event field
-void _fill_trace_info(alloc_node_t *node, trace_event_t event_type);
+// Fills the given trace_info_t with the current event type and
+// source location
+// \param info        pointer to the trace_info_t to populate
+// \param event_type  the event type to record
+void _fill_trace_info(trace_info_t *info, trace_event_t event_type);
 
 // Dumps error information for the given node
 // \param node        pointer to the node for which to dump error info
