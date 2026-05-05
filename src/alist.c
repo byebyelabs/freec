@@ -1,8 +1,6 @@
 #include "alist.h"
 #include "utils.h"
 
-#include "tracing.c"
-
 #include <pthread.h>
 
 static alloc_node_t *alloc_list_head = NULL;
