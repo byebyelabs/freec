@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #ifndef FREEC_UTILS_H
 #define FREEC_UTILS_H 1
 
