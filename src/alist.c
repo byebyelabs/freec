@@ -15,7 +15,7 @@ void add_alloc_event(void *mem_ptr, size_t block_sz) {
   // use real malloc to allocate memory for node
   alloc_node_t *new_node = real_malloc(sizeof(alloc_node_t));
   if (new_node == NULL) {
-    log_message("Failed Allocating Memory in add_alloc_event!\n");
+    log_message("Failed Allocating Memory in add_alloc_event!\n", ERROR);
     exit(1);
   }
 
@@ -46,13 +46,13 @@ void add_deref_event(void *mem_ptr) {
 
   // use before malloc error
   if (node == NULL) {
-    log_message("Use Before Malloc Error!\n");
+    log_message("Use Before Malloc Error!\n", ERROR);
     exit(1);
   }
 
   // use after free error
   if (node->last_event.event == FREE) {
-    log_message("Use After Free Error!\n");
+    log_message("Use After Free Error!\n", ERROR);
     exit(1);
   }
 
@@ -67,13 +67,13 @@ void add_freed_event(void *mem_ptr) {
 
   // invalid free error
   if (node == NULL) {
-    log_message("Invalid Free Error!\n");
+    log_message("Invalid Free Error!\n", ERROR);
     exit(1);
   }
 
   // double free error
   if (node->last_event.event == FREE) {
-    log_message("Double Free Error!\n");
+    log_message("Double Free Error!\n", ERROR);
     exit(1);
   }
 
