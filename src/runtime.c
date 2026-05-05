@@ -12,6 +12,6 @@ void free(void *ptr) {
   // TODO: instead of freeing, protect page
 }
 
-void protected_page_access_handler(??) {
-  ??
-}
+// void protected_page_access_handler(??) {
+//   ??
+// }
