@@ -2,9 +2,12 @@
 
 #include "alist.h"
 #include "utils.h"
+#include "runtime.h"
 
 // TODO: make it possible to have more pages
-// underlying page
+/**
+ * underlying page
+ */
 void* u_page_start = NULL;
 size_t offset = 0;
 
@@ -18,6 +21,24 @@ void unset_route_custom_malloc_to_real_malloc(void) {
     ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
 }
 
+// ---- SIGNAL HANDLING -----------------------------
+__attribute__((constructor)) void init() {
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(struct sigaction));
+  sa.sa_sigaction = protected_page_access_handler;
+  sa.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGSEGV, &sa, NULL) != 0) {
+    perror("!! sigaction failed");
+    exit(EXIT_FAILURE);
+  }
+}
+
+void protected_page_access_handler(int signal, siginfo_t* info, void* ctx) {
+  add_deref_event(info->si_addr);
+}
+
+// ---- CUSTOM ALLOC. FUNCS -------------------------
 void *malloc(size_t size) {
   if (ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC) {
     return real_malloc(size);
@@ -61,7 +82,3 @@ void free(void *ptr) {
   log_message(buffer, DEBUG);
   mprotect(ptr, get_page_size(), PROT_NONE);
 }
-
-// void protected_page_access_handler(??) {
-//   ??
-// }

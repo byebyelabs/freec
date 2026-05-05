@@ -29,6 +29,9 @@ def main():
         print(command)
         subprocess.run(command, shell=True)
 
+        # print padding line
+        print()
+
 
 if __name__ == "__main__":
     main()
