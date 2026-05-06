@@ -52,7 +52,9 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
 }
 
 void _dump_error_info(alloc_node_t *node) {
-  if (node == NULL) { return; }
+  if (node == NULL) {
+    return;
+  }
 
   log_message("[tracing]: _dump_error_info needs to dump here\n", DEBUG);
 }
