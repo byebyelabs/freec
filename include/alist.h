@@ -36,6 +36,11 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type);
 // \param node        pointer to the node for which to dump error info
 void _dump_error_info(alloc_node_t *node);
 
+// Run addr2line and save results in info
+// \param info        trace_info_t to fill out
+// \param backtrace   result of running backtrace symbols offset
+void addr2line(trace_info_t *info, char *backtrace);
+
 // TODO: add documentation
 void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match);
 
