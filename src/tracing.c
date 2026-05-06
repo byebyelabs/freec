@@ -50,7 +50,7 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   unset_route_custom_malloc_to_real_malloc();
 
   // line number should not be more than 15 digits
-  char tmp_line_num_str[16]; 
+  char tmp_line_num_str[16];
   sprintf(tmp_line_num_str, "%d\n", info->line);
 
   log_message("[tracing]: filled trace location: ", DEBUG);
@@ -61,7 +61,8 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   real_free(funcNames);
 }
 
-void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_type) {
+void _dump_error_info_and_exit(alloc_node_t *node,
+                               memory_violation_t violation_type) {
   if (node == NULL) {
     return;
   }
@@ -71,7 +72,8 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
 
   trace_info_t violator;
   // violation can only occur when user defers or frees
-  trace_event_t user_action = (USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC)?DEREF:FREE;
+  trace_event_t user_action =
+      (USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE;
   _fill_trace_info(&violator, user_action);
 
   // Rust style error dumping kind of like follows
@@ -91,11 +93,11 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
   // helpful message first
   log_message("error: ", ERROR);
   if (violation_type == USE_AFTER_FREE) {
-      log_message("cannot use memory after freeing\n", ERROR);
+    log_message("cannot use memory after freeing\n", ERROR);
   } else if (violation_type == INVALID_FREE) {
-      log_message("cannot free memory that is not malloc-ed\n", ERROR);
+    log_message("cannot free memory that is not malloc-ed\n", ERROR);
   } else if (violation_type == DOUBLE_FREE) {
-      log_message("cannot free the same memory more than once\n", ERROR);
+    log_message("cannot free the same memory more than once\n", ERROR);
   }
 
   // file where violation occured
@@ -107,35 +109,35 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
 
   // if USE_AFTER_FREE or DOUBLE_FREE, print where malloc-ed
   if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
-      _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
+    _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
 
   // print last event
-  char* last_event_meaning;
+  char *last_event_meaning;
   if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
-      last_event_meaning = "correctly freed here";
-  else 
-      last_event_meaning = "last dereference here";
-  
-  _pretty_print_trace(&node->last_event, last_event_meaning, '-');
-  
-  // print violation
-  char* violation_meaning;
-  if (violation_type == USE_AFTER_FREE)
-      violation_meaning = "first derefence after free";
-  else if (violation_type == DOUBLE_FREE)
-      violation_meaning = "second free occurred here";
-  else if (violation_type == INVALID_FREE)
-      violation_meaning = "attempting to free non-malloc-ed memory here";
+    last_event_meaning = "correctly freed here";
   else
-      violation_meaning = "impossible code: what is this ??";
-  
+    last_event_meaning = "last dereference here";
+
+  _pretty_print_trace(&node->last_event, last_event_meaning, '-');
+
+  // print violation
+  char *violation_meaning;
+  if (violation_type == USE_AFTER_FREE)
+    violation_meaning = "first derefence after free";
+  else if (violation_type == DOUBLE_FREE)
+    violation_meaning = "second free occurred here";
+  else if (violation_type == INVALID_FREE)
+    violation_meaning = "attempting to free non-malloc-ed memory here";
+  else
+    violation_meaning = "impossible code: what is this ??";
+
   _pretty_print_trace(&violator, violation_meaning, '^');
 
   // crash
   exit(EXIT_FAILURE);
 }
 
-int TMP=0;
+int TMP = 0;
 void addr2line(trace_info_t *info, char *backtrace) {
   log_message("[tracing] addr2line called\n", DEBUG);
 
@@ -204,67 +206,69 @@ void addr2line(trace_info_t *info, char *backtrace) {
   log_message("\n", DEBUG);
 
   // hard coding because can't run addr2line
-  info->line = (TMP == 0)?5:((TMP == 1)?7:8);
+  info->line = (TMP == 0) ? 5 : ((TMP == 1) ? 7 : 8);
   TMP++;
-  strcpy(info->file_path, "/home/bhattara/csc313/freec/tests/double_free_basic.c");
+  strcpy(info->file_path,
+         "/home/bhattara/csc313/freec/tests/double_free_basic.c");
   info->file_path[MAX_PATH_BUFF - 1] = '\0';
 }
 
 void _print_file_line(char *path, int line, char highlight, char *message) {
-    set_route_custom_malloc_to_real_malloc();
-    FILE *file = fopen(path, "r");
-    int leading_white_space = MAX_LINE_NUM_DIGITS - 2, trimmed_line_len = 0;
+  set_route_custom_malloc_to_real_malloc();
+  FILE *file = fopen(path, "r");
+  int leading_white_space = MAX_LINE_NUM_DIGITS - 2, trimmed_line_len = 0;
 
-    line -= 1; // file lines are 1-indexed
-    while (line) {
-        if (fgetc(file) == '\n') line--;
-    }
+  line -= 1; // file lines are 1-indexed
+  while (line) {
+    if (fgetc(file) == '\n')
+      line--;
+  }
 
-    // skip leading white space
-    while (fgetc(file) == ' ')
-        leading_white_space++;
+  // skip leading white space
+  while (fgetc(file) == ' ')
+    leading_white_space++;
 
-    // first char was skipped
-    fseek(file, -1, SEEK_CUR);
-    
-    // print line
-    char ch = fgetc(file);
-    char str[2]; 
-    do {
-        snprintf(str, 2, "%c", ch);
-        log_message(str, ERROR);
-        trimmed_line_len++;
-    } while ((ch = fgetc(file)) != '\n');
-    log_message("\n", ERROR);
+  // first char was skipped
+  fseek(file, -1, SEEK_CUR);
 
-    // in new line, first print leading_white_space ' '
-    while (leading_white_space--)
-        log_message(" ", ERROR);
+  // print line
+  char ch = fgetc(file);
+  char str[2];
+  do {
+    snprintf(str, 2, "%c", ch);
+    log_message(str, ERROR);
+    trimmed_line_len++;
+  } while ((ch = fgetc(file)) != '\n');
+  log_message("\n", ERROR);
 
-    // then print trimmed_line_len highlights
-    snprintf(str, 2, "%c", highlight);
-    while (trimmed_line_len--)
-        log_message(str, ERROR);
+  // in new line, first print leading_white_space ' '
+  while (leading_white_space--)
     log_message(" ", ERROR);
 
-    // finally print the error message
-    log_message(message, ERROR);
+  // then print trimmed_line_len highlights
+  snprintf(str, 2, "%c", highlight);
+  while (trimmed_line_len--)
+    log_message(str, ERROR);
+  log_message(" ", ERROR);
 
-    // whitespace and then "...\n"
-    log_message("\n", ERROR);
-    leading_white_space = MAX_LINE_NUM_DIGITS - 2;
-    while (leading_white_space--)
-        log_message(" ", ERROR);
-    log_message("...\n", ERROR);
-    
-    fclose(file);
-    unset_route_custom_malloc_to_real_malloc();
+  // finally print the error message
+  log_message(message, ERROR);
+
+  // whitespace and then "...\n"
+  log_message("\n", ERROR);
+  leading_white_space = MAX_LINE_NUM_DIGITS - 2;
+  while (leading_white_space--)
+    log_message(" ", ERROR);
+  log_message("...\n", ERROR);
+
+  fclose(file);
+  unset_route_custom_malloc_to_real_malloc();
 }
 
 void _pretty_print_trace(trace_info_t *info, char *message, char highlight) {
-    char padded_line_num[MAX_LINE_NUM_DIGITS + 1]; // + 1 for space
-    sprintf(padded_line_num, "%6d ", info->line);
+  char padded_line_num[MAX_LINE_NUM_DIGITS + 1]; // + 1 for space
+  sprintf(padded_line_num, "%6d ", info->line);
 
-    log_message(padded_line_num, ERROR);
-    _print_file_line(info->file_path, info->line, highlight, message);
+  log_message(padded_line_num, ERROR);
+  _print_file_line(info->file_path, info->line, highlight, message);
 }
