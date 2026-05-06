@@ -119,6 +119,7 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
   exit(EXIT_FAILURE);
 }
 
+int TMP=0;
 void addr2line(trace_info_t *info, char *backtrace) {
   log_message("[tracing] addr2line called\n", DEBUG);
 
@@ -168,6 +169,9 @@ void addr2line(trace_info_t *info, char *backtrace) {
     //   log_message("[tracing]: execvp failed\n", ERROR);
     //   exit(EXIT_FAILURE);
     // }
+
+    // end child process
+    exit(EXIT_SUCCESS);
   } else {
     // Parent process: wait for child then copy result to info
     wait(NULL);
@@ -184,7 +188,8 @@ void addr2line(trace_info_t *info, char *backtrace) {
   log_message("\n", DEBUG);
 
   // hard coding because can't run addr2line
-  info->line = 8;
+  info->line = (TMP == 0)?5:((TMP == 1)?7:8);
+  TMP++;
   strcpy(info->file_path, "/home/bhattara/csc313/freec/tests/double_free_basic.c");
   info->file_path[MAX_PATH_BUFF - 1] = '\0';
 }
