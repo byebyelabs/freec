@@ -3,10 +3,10 @@
 
 #include <dlfcn.h>
 #include <stddef.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 typedef void *(*malloc_fn_t)(size_t size);
 typedef void (*free_fn_t)(void *ptr);

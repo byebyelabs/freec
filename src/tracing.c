@@ -38,10 +38,11 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   char **funcNames = backtrace_symbols(traces, count);
   unset_route_custom_malloc_to_real_malloc();
 
-  if (funcNames == NULL) { return; }
+  if (funcNames == NULL) {
+    return;
+  }
 
-  size_t user_code_loc =
-      (count > BACKTRACE_SKIP) ? BACKTRACE_SKIP : count - 1;
+  size_t user_code_loc = (count > BACKTRACE_SKIP) ? BACKTRACE_SKIP : count - 1;
   snprintf(info->file_path, sizeof(info->file_path), "%s",
            funcNames[user_code_loc]);
 
@@ -53,7 +54,9 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
 }
 
 void _dump_error_info(alloc_node_t *node) {
-  if (node == NULL) { return; }
+  if (node == NULL) {
+    return;
+  }
 
   log_message("[tracing]: _dump_error_info needs to dump here\n", DEBUG);
 }

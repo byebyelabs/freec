@@ -1,24 +1,24 @@
 #define _GNU_SOURCE
 
+#include "runtime.h"
 #include "alist.h"
 #include "utils.h"
-#include "runtime.h"
 
 // TODO: make it possible to have more pages
 /**
  * underlying page
  */
-void* u_page_start = NULL;
+void *u_page_start = NULL;
 size_t offset = 0;
 
 int ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
 
 void set_route_custom_malloc_to_real_malloc(void) {
-    ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 1;
+  ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 1;
 }
 
 void unset_route_custom_malloc_to_real_malloc(void) {
-    ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
+  ROUTE_CUSTOM_MALLOC_TO_REAL_MALLOC = 0;
 }
 
 // ---- SIGNAL HANDLING -----------------------------
@@ -34,7 +34,7 @@ __attribute__((constructor)) void init() {
   }
 }
 
-void protected_page_access_handler(int signal, siginfo_t* info, void* ctx) {
+void protected_page_access_handler(int signal, siginfo_t *info, void *ctx) {
   add_deref_event(info->si_addr);
 }
 
@@ -48,7 +48,8 @@ void *malloc(size_t size) {
   if (u_page_start == NULL) {
     // if no underlying page
     log_message("making new page\n", DEBUG);
-    u_page_start = mmap(NULL, get_page_size(), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+    u_page_start = mmap(NULL, get_page_size(), PROT_READ | PROT_WRITE,
+                        MAP_ANONYMOUS | MAP_SHARED, -1, 0);
     if (u_page_start == MAP_FAILED) {
       log_message("!! Failed to mmap underlying page!", ERROR);
       exit(EXIT_FAILURE);
@@ -56,13 +57,14 @@ void *malloc(size_t size) {
   }
 
   // make virtual page
-  void* v_page_start = mremap((uint8_t*) u_page_start + offset, 0, get_page_size(), MREMAP_MAYMOVE);
+  void *v_page_start = mremap((uint8_t *)u_page_start + offset, 0,
+                              get_page_size(), MREMAP_MAYMOVE);
   if (v_page_start == MAP_FAILED) {
     log_message("!! Failed to make virtual address!", ERROR);
   }
 
   // construct virtual address
-  void* v_addr = (uint8_t*) v_page_start + offset;
+  void *v_addr = (uint8_t *)v_page_start + offset;
   offset += size;
   add_alloc_event(v_addr, size);
 
