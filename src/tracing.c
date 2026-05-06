@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,6 +66,9 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
     return;
   }
 
+  // this function will exit
+  set_route_custom_malloc_to_real_malloc();
+
   trace_info_t violator;
   // violation can only occur when user defers or frees
   trace_event_t user_action = (USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC)?DEREF:FREE;
@@ -112,6 +114,9 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
   
   // print violation
   _pretty_print_trace(&violator, "real issue TODO:improve msg", '^');
+
+  // crash
+  exit(EXIT_FAILURE);
 }
 
 void addr2line(trace_info_t *info, char *backtrace) {
@@ -185,8 +190,9 @@ void addr2line(trace_info_t *info, char *backtrace) {
 }
 
 void _print_file_line(char *path, int line, char highlight, char *message) {
+    set_route_custom_malloc_to_real_malloc();
     FILE *file = fopen(path, "r");
-    int leading_white_space = MAX_LINE_NUM_DIGITS, trimmed_line_len = 0;
+    int leading_white_space = MAX_LINE_NUM_DIGITS - 2, trimmed_line_len = 0;
 
     line -= 1; // file lines are 1-indexed
     while (line) {
@@ -197,34 +203,46 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
     while (fgetc(file) == ' ')
         leading_white_space++;
 
+    // first char was skipped
+    fseek(file, -1, SEEK_CUR);
+    
     // print line
     char ch = fgetc(file);
-    char str[1]; 
+    char str[2]; 
     do {
-        snprintf(str, 1, "%c", ch);
+        snprintf(str, 2, "%c", ch);
         log_message(str, ERROR);
         trimmed_line_len++;
     } while ((ch = fgetc(file)) != '\n');
+    log_message("\n", ERROR);
 
     // in new line, first print leading_white_space ' '
     while (leading_white_space--)
         log_message(" ", ERROR);
 
     // then print trimmed_line_len highlights
-    snprintf(str, 1, "%c", highlight);
+    snprintf(str, 2, "%c", highlight);
     while (trimmed_line_len--)
         log_message(str, ERROR);
+    log_message(" ", ERROR);
 
     // finally print the error message
     log_message(message, ERROR);
-    log_message("\n...\n", ERROR);
+
+    // whitespace and then "...\n"
+    log_message("\n", ERROR);
+    leading_white_space = MAX_LINE_NUM_DIGITS - 2;
+    while (leading_white_space--)
+        log_message(" ", ERROR);
+    log_message("...\n", ERROR);
     
     fclose(file);
+    unset_route_custom_malloc_to_real_malloc();
 }
 
 void _pretty_print_trace(trace_info_t *info, char *message, char highlight) {
     char padded_line_num[MAX_LINE_NUM_DIGITS + 1]; // + 1 for space
-    sprintf(padded_line_num, "%7d ", info->line);
+    sprintf(padded_line_num, "%6d ", info->line);
 
     log_message(padded_line_num, ERROR);
     _print_file_line(info->file_path, info->line, highlight, message);
