@@ -99,7 +99,7 @@ void addr2line(trace_info_t *info, char *backtrace) {
     dup2(stdout, pipefd[1]);
       
     char* a2l_args[] = { "addr2line", "-e", obj_loc, "-i", offset, NULL };
-    if(execvp("LD_PRELOAD=""addr2line", a2l_args)) {
+    if(execvp("LD_PRELOAD='' addr2line", a2l_args)) {
       log_message("[tracing]: execvp failed\n", ERROR);
       exit(EXIT_FAILURE);
     }
