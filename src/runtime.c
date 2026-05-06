@@ -35,6 +35,8 @@ __attribute__((constructor)) void init() {
 }
 
 void protected_page_access_handler(int signal, siginfo_t *info, void *ctx) {
+  (void)signal;
+  (void)ctx;
   add_deref_event(info->si_addr);
 }
 
