@@ -110,10 +110,26 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
       _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
 
   // print last event
-  _pretty_print_trace(&node->last_event, "last event TODO:improve msg", '-');
+  char* last_event_meaning;
+  if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
+      last_event_meaning = "correctly freed here";
+  else 
+      last_event_meaning = "last dereference here";
+  
+  _pretty_print_trace(&node->last_event, last_event_meaning, '-');
   
   // print violation
-  _pretty_print_trace(&violator, "real issue TODO:improve msg", '^');
+  char* violation_meaning;
+  if (violation_type == USE_AFTER_FREE)
+      violation_meaning = "first derefence after free";
+  else if (violation_type == DOUBLE_FREE)
+      violation_meaning = "second free occurred here";
+  else if (violation_type == INVALID_FREE)
+      violation_meaning = "attempting to free non-malloc-ed memory here";
+  else
+      violation_meaning = "impossible code: what is this ??";
+  
+  _pretty_print_trace(&violator, violation_meaning, '^');
 
   // crash
   exit(EXIT_FAILURE);
