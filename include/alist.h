@@ -11,6 +11,12 @@
 
 typedef int ln_num_t;
 typedef enum { ALLOC, FREE, DEREF } trace_event_t;
+typedef enum {
+  USE_BEFORE_MALLOC,
+  USE_AFTER_FREE,
+  INVALID_FREE,
+  DOUBLE_FREE
+} memory_violation_t;
 
 typedef struct {
   ln_num_t line;
@@ -32,9 +38,10 @@ typedef struct alloc_node {
 // \param event_type  the event type to record
 void _fill_trace_info(trace_info_t *info, trace_event_t event_type);
 
-// Dumps error information for the given node
+// Dumps error information for the given node and exits with EXIT_FAILURE
 // \param node        pointer to the node for which to dump error info
-void _dump_error_info(alloc_node_t *node);
+void _dump_error_info_and_exit(alloc_node_t *node,
+                               memory_violation_t violation_type);
 
 // Run addr2line and save results in info
 // \param info        trace_info_t to fill out
