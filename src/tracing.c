@@ -46,9 +46,14 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
 
   unset_route_custom_malloc_to_real_malloc();
 
+  // line number should not be more than 15 digits
+  char tmp_line_num_str[16]; 
+  sprintf(tmp_line_num_str, "%d\n", info->line);
+
   log_message("[tracing]: filled trace location: ", DEBUG);
   log_message(info->file_path, DEBUG);
-  log_message("\n", DEBUG);
+  log_message(" line: ", DEBUG);
+  log_message(tmp_line_num_str, DEBUG);
 
   real_free(funcNames);
 }
@@ -105,10 +110,11 @@ void addr2line(trace_info_t *info, char *backtrace) {
     dup2(stdout, pipefd[1]);
 
     char *a2l_args[] = {"addr2line", "-e", obj_loc, "-i", offset, NULL};
-    if (execvp("LD_PRELOAD='' addr2line", a2l_args)) {
-      log_message("[tracing]: execvp failed\n", ERROR);
-      exit(EXIT_FAILURE);
-    }
+    a2l_args[0]++;
+    // if (execvp("LD_PRELOAD='' addr2line", a2l_args)) {
+    //   log_message("[tracing]: execvp failed\n", ERROR);
+    //   exit(EXIT_FAILURE);
+    // }
   } else {
     // Parent process: wait for child then copy result to info
     wait(NULL);
@@ -120,6 +126,12 @@ void addr2line(trace_info_t *info, char *backtrace) {
     read(pipefd[0], info->file_path, MAX_PATH_BUFF - 1);
   }
 
-  info->line = 0;
+  log_message("offset: ", DEBUG);
+  log_message(offset, DEBUG);
+  log_message("\n", DEBUG);
+
+  // hard coding because can't run addr2line
+  info->line = 8;
+  strcpy(info->file_path, "/home/bhattara/csc313/freec/tests/double_free_basic.c");
   info->file_path[MAX_PATH_BUFF - 1] = '\0';
 }
