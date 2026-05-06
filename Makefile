@@ -1,7 +1,10 @@
 .PHONY: all clean tests
 
 CC        = clang
-CFLAGS    = -std=c11 -Wall -Wextra -Wpedantic -O0 -Iinclude -pthread
+
+# addr2line requires -g flag
+# Citation: https://stackoverflow.com/a/7648826
+CFLAGS    = -std=c11 -Wall -Wextra -Wpedantic -O0 -Iinclude -pthread -g
 
 BUILD_SRC = src/runtime.c src/utils.c src/tracing.c src/alist.c
 BUILD_DIR = build
