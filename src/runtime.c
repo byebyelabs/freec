@@ -29,7 +29,7 @@ __attribute__((constructor)) void init() {
   sa.sa_flags = SA_SIGINFO;
 
   if (sigaction(SIGSEGV, &sa, NULL) != 0) {
-    perror("!! sigaction failed");
+    log_message("!! sigaction failed", ERROR);
     exit(EXIT_FAILURE);
   }
 }
@@ -50,7 +50,7 @@ void *malloc(size_t size) {
     log_message("making new page\n", DEBUG);
     u_page_start = mmap(NULL, get_page_size(), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
     if (u_page_start == MAP_FAILED) {
-      perror("!! Failed to mmap underlying page!");
+      log_message("!! Failed to mmap underlying page!", ERROR);
       exit(EXIT_FAILURE);
     }
   }
@@ -58,7 +58,7 @@ void *malloc(size_t size) {
   // make virtual page
   void* v_page_start = mremap((uint8_t*) u_page_start + offset, 0, get_page_size(), MREMAP_MAYMOVE);
   if (v_page_start == MAP_FAILED) {
-    perror("!! Failed to make virtual address!");
+    log_message("!! Failed to make virtual address!", ERROR);
   }
 
   // construct virtual address
