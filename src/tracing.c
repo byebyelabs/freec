@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +11,10 @@
 #include "utils.h"
 
 #define TRACE_DEPTH 32
+#define MAX_LINE_NUM_DIGITS 7
 #define USER_CODE_LOCATION_IN_TRACE 3
+
+void _pretty_print_trace(trace_info_t *info, char *message, char highlight);
 
 void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   log_message("[tracing]: _fill_trace_info called\n", DEBUG);
@@ -58,12 +62,56 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   real_free(funcNames);
 }
 
-void _dump_error_info(alloc_node_t *node) {
+void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_type) {
   if (node == NULL) {
     return;
   }
 
-  log_message("[tracing]: _dump_error_info needs to dump here\n", DEBUG);
+  trace_info_t violator;
+  // violation can only occur when user defers or frees
+  trace_event_t user_action = (USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC)?DEREF:FREE;
+  _fill_trace_info(&violator, user_action);
+
+  // Rust style error dumping kind of like follows
+  /*
+    error: cannot free the same memory more than once
+    -> /home/usr/csc313/freec/tests/double_free_basic.c:8
+    05   int *p = malloc(sizeof(int) * 10);
+         ---------------------------------- malloc happened here
+    ...
+    07   free(p);
+         -------- first free occured here
+    ...
+    08   free(p); // DOUBLE FREE
+         ^^^^^^^^^^^^^^^^^^^^^^^ second free occured here
+   */
+
+  // helpful message first
+  log_message("error: ", ERROR);
+  if (violation_type == USE_AFTER_FREE) {
+      log_message("cannot use memory after freeing\n", ERROR);
+  } else if (violation_type == INVALID_FREE) {
+      log_message("cannot free memory that is not malloc-ed\n", ERROR);
+  } else if (violation_type == DOUBLE_FREE) {
+      log_message("cannot free the same memory more than once\n", ERROR);
+  }
+
+  // file where violation occured
+  log_message("-> ", ERROR);
+  log_message(violator.file_path, ERROR);
+  char tmp_ln_to_str[MAX_LINE_NUM_DIGITS + 2];
+  sprintf(tmp_ln_to_str, ":%d\n", violator.line);
+  log_message(tmp_ln_to_str, ERROR);
+
+  // if USE_AFTER_FREE or DOUBLE_FREE, print where malloc-ed
+  if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
+      _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
+
+  // print last event
+  _pretty_print_trace(&node->last_event, "last event TODO:improve msg", '-');
+  
+  // print violation
+  _pretty_print_trace(&violator, "real issue TODO:improve msg", '^');
 }
 
 void addr2line(trace_info_t *info, char *backtrace) {
@@ -134,4 +182,50 @@ void addr2line(trace_info_t *info, char *backtrace) {
   info->line = 8;
   strcpy(info->file_path, "/home/bhattara/csc313/freec/tests/double_free_basic.c");
   info->file_path[MAX_PATH_BUFF - 1] = '\0';
+}
+
+void _print_file_line(char *path, int line, char highlight, char *message) {
+    FILE *file = fopen(path, "r");
+    int leading_white_space = MAX_LINE_NUM_DIGITS, trimmed_line_len = 0;
+
+    line -= 1; // file lines are 1-indexed
+    while (line) {
+        if (fgetc(file) == '\n') line--;
+    }
+
+    // skip leading white space
+    while (fgetc(file) == ' ')
+        leading_white_space++;
+
+    // print line
+    char ch = fgetc(file);
+    char str[1]; 
+    do {
+        snprintf(str, 1, "%c", ch);
+        log_message(str, ERROR);
+        trimmed_line_len++;
+    } while ((ch = fgetc(file)) != '\n');
+
+    // in new line, first print leading_white_space ' '
+    while (leading_white_space--)
+        log_message(" ", ERROR);
+
+    // then print trimmed_line_len highlights
+    snprintf(str, 1, "%c", highlight);
+    while (trimmed_line_len--)
+        log_message(str, ERROR);
+
+    // finally print the error message
+    log_message(message, ERROR);
+    log_message("\n...\n", ERROR);
+    
+    fclose(file);
+}
+
+void _pretty_print_trace(trace_info_t *info, char *message, char highlight) {
+    char padded_line_num[MAX_LINE_NUM_DIGITS + 1]; // + 1 for space
+    sprintf(padded_line_num, "%7d ", info->line);
+
+    log_message(padded_line_num, ERROR);
+    _print_file_line(info->file_path, info->line, highlight, message);
 }
