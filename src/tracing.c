@@ -67,9 +67,6 @@ void _dump_error_info_and_exit(alloc_node_t *node,
     return;
   }
 
-  // this function will exit
-  set_route_custom_malloc_to_real_malloc();
-
   trace_info_t violator;
   // violation can only occur when user defers or frees
   trace_event_t user_action =
@@ -91,13 +88,13 @@ void _dump_error_info_and_exit(alloc_node_t *node,
    */
 
   // helpful message first
-  log_message("error: ", ERROR);
+  log_message(RED_MSG("error: "), ERROR);
   if (violation_type == USE_AFTER_FREE) {
-    log_message("cannot use memory after freeing\n", ERROR);
+    log_message(RED_MSG("cannot use memory after freeing\n"), ERROR);
   } else if (violation_type == INVALID_FREE) {
-    log_message("cannot free memory that is not malloc-ed\n", ERROR);
+    log_message(RED_MSG("cannot free memory that is not malloc-ed\n"), ERROR);
   } else if (violation_type == DOUBLE_FREE) {
-    log_message("cannot free the same memory more than once\n", ERROR);
+    log_message(RED_MSG("cannot free the same memory more than once\n"), ERROR);
   }
 
   // file where violation occured
