@@ -160,7 +160,7 @@ void addr2line(trace_info_t *info, char *backtrace) {
 
     // print to pipefd instead of STDOUT
     // Citation: https://man7.org/linux/man-pages/man2/dup.2.html
-    dup2(stdout, pipefd[1]);
+    dup2(STDOUT_FILENO, pipefd[1]);
 
     char *a2l_args[] = {"addr2line", "-e", obj_loc, "-i", offset, NULL};
     a2l_args[0]++;
