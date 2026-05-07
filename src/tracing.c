@@ -125,8 +125,11 @@ void _dump_error_info_and_exit(alloc_node_t *node,
     violation_meaning = "second free occurred here";
   else if (violation_type == INVALID_FREE)
     violation_meaning = "attempting to free non-malloc-ed memory here";
-  else
+  else {
     violation_meaning = "impossible code: what is this ??";
+    log_message(violation_meaning, ERROR);
+    exit(EXIT_FAILURE);
+  }
 
   _pretty_print_trace(&violator, violation_meaning, '^');
 
@@ -136,7 +139,8 @@ void _dump_error_info_and_exit(alloc_node_t *node,
 
 int TMP = 0;
 void addr2line(trace_info_t *info, char *backtrace) {
-  log_message("[tracing] addr2line called\n", DEBUG);
+  log_message("[tracing] addr2line called on ", DEBUG);
+  log_message(backtrace, DEBUG);
 
   // backtrace looks like: `<obj_loc>(+<offset>) [<instr_addr>]`
   // need to extract obj_loc and offset
@@ -162,6 +166,7 @@ void addr2line(trace_info_t *info, char *backtrace) {
   // create pipe to capture result of addr2line
   // Citation: https://man7.org/linux/man-pages/man2/pipe.2.html
   int pipefd[2];
+  pipe(pipefd);
 
   // next, call `addr2line -e <obj_loc> -i <offset>` in a different process
   pid_t child_pid = fork();
@@ -176,14 +181,15 @@ void addr2line(trace_info_t *info, char *backtrace) {
 
     // print to pipefd instead of STDOUT
     // Citation: https://man7.org/linux/man-pages/man2/dup.2.html
-    dup2(STDOUT_FILENO, pipefd[1]);
+    dup2(pipefd[1],STDOUT_FILENO);
 
+    // addr2line should run with regular malloc
+    unsetenv("LD_PRELOAD");
     char *a2l_args[] = {"addr2line", "-e", obj_loc, "-i", offset, NULL};
-    a2l_args[0]++;
-    // if (execvp("LD_PRELOAD='' addr2line", a2l_args)) {
-    //   log_message("[tracing]: execvp failed\n", ERROR);
-    //   exit(EXIT_FAILURE);
-    // }
+    if (execvp("addr2line", a2l_args)) {
+      log_message("[tracing]: execvp failed\n", ERROR);
+      exit(EXIT_FAILURE);
+    }
 
     // end child process
     exit(EXIT_SUCCESS);
@@ -192,22 +198,23 @@ void addr2line(trace_info_t *info, char *backtrace) {
     wait(NULL);
 
     // close unused write for parent
-    close(pipefd[0]);
+    close(pipefd[1]);
 
     // read result of addr2line
     read(pipefd[0], info->file_path, MAX_PATH_BUFF - 1);
+
+    // replace ':' with '\0'
+    char *fp = info->file_path;
+    while (*fp != ':') fp++;
+    *fp = '\0';
+
+    info->line = atoi(fp+1);
+    
+    log_message("[tracing]: file path received by addr2line: ", ERROR);
+    log_message(info->file_path, ERROR);
+    log_message(" and line: ", ERROR);
+    log_message(fp+1, ERROR);
   }
-
-  log_message("offset: ", DEBUG);
-  log_message(offset, DEBUG);
-  log_message("\n", DEBUG);
-
-  // hard coding because can't run addr2line
-  info->line = (TMP == 0) ? 5 : ((TMP == 1) ? 7 : 8);
-  TMP++;
-  strcpy(info->file_path,
-         "/home/bhattara/csc313/freec/tests/double_free_basic.c");
-  info->file_path[MAX_PATH_BUFF - 1] = '\0';
 }
 
 void _print_file_line(char *path, int line, char highlight, char *message) {
