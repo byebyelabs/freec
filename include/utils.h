@@ -28,4 +28,8 @@ typedef long page_size_t;
  */
 page_size_t get_page_size(void);
 
+// Citation: https://stackoverflow.com/a/51947317
+#define RED_MSG(X) ("\033[31m" X "\033[0m")
+#define BLUE_MSG(X) ("\033[34m" X "\033[0m")
+
 #endif

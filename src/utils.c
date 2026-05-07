@@ -12,7 +12,7 @@ page_size_t get_page_size(void) {
   return _PAGE_SIZE;
 }
 
-severity_t LOG_SEVERITY = DEBUG;
+severity_t LOG_SEVERITY = ERROR;
 
 void log_message(char *message, severity_t severity) {
   if (severity < LOG_SEVERITY) {

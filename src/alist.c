@@ -24,7 +24,7 @@ void add_alloc_event(void *mem_ptr, size_t block_sz) {
   new_node->next = NULL;
 
   // fill trace info (last event == this event)
-  _fill_trace_info(&new_node->alloc_info, ALLOC);
+  _fill_trace_info(&new_node->alloc_info, ALLOC, 0);
   new_node->last_event = new_node->alloc_info;
 
   // add node to linked list; need to lock in case of concurrent access
@@ -45,20 +45,16 @@ void add_deref_event(void *mem_ptr) {
 
   // use before malloc error
   if (node == NULL) {
-    log_message("Use Before Malloc Error!\n", ERROR);
-    _dump_error_info(node);
-    exit(1);
+    _dump_error_info_and_exit(node, USE_BEFORE_MALLOC);
   }
 
   // use after free error
   if (node->last_event.event == FREE) {
-    log_message("Use After Free Error!\n", ERROR);
-    _dump_error_info(node);
-    exit(1);
+    _dump_error_info_and_exit(node, USE_AFTER_FREE);
   }
 
   // fill trace info (last event == this event)
-  _fill_trace_info(&node->last_event, DEREF);
+  _fill_trace_info(&node->last_event, DEREF, 0);
 }
 
 void add_freed_event(void *mem_ptr) {
@@ -71,20 +67,16 @@ void add_freed_event(void *mem_ptr) {
 
   // invalid free error
   if (node == NULL) {
-    log_message("Invalid Free Error!\n", ERROR);
-    _dump_error_info(start_node);
-    exit(1);
+    _dump_error_info_and_exit(start_node, INVALID_FREE);
   }
 
   // double free error
   if (node->last_event.event == FREE) {
-    log_message("Double Free Error!\n", ERROR);
-    _dump_error_info(node);
-    exit(1);
+    _dump_error_info_and_exit(node, DOUBLE_FREE);
   }
 
   // fill trace info (last event == this event)
-  _fill_trace_info(&node->last_event, FREE);
+  _fill_trace_info(&node->last_event, FREE, 0);
 }
 
 void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match) {

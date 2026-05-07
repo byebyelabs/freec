@@ -11,6 +11,12 @@
 
 typedef int ln_num_t;
 typedef enum { ALLOC, FREE, DEREF } trace_event_t;
+typedef enum {
+  USE_BEFORE_MALLOC,
+  USE_AFTER_FREE,
+  INVALID_FREE,
+  DOUBLE_FREE
+} memory_violation_t;
 
 typedef struct {
   ln_num_t line;
@@ -28,13 +34,20 @@ typedef struct alloc_node {
 
 // Fills the given trace_info_t with the current event type and
 // source location
-// \param info        pointer to the trace_info_t to populate
-// \param event_type  the event type to record
-void _fill_trace_info(trace_info_t *info, trace_event_t event_type);
+// \param info         pointer to the trace_info_t to populate
+// \param event_type   the event type to record
+// \param is_violation is this the violation statement
+void _fill_trace_info(trace_info_t *info, trace_event_t event_type, int is_violation);
 
-// Dumps error information for the given node
+// Dumps error information for the given node and exits with EXIT_FAILURE
 // \param node        pointer to the node for which to dump error info
-void _dump_error_info(alloc_node_t *node);
+void _dump_error_info_and_exit(alloc_node_t *node,
+                               memory_violation_t violation_type);
+
+// Run addr2line and save results in info
+// \param info        trace_info_t to fill out
+// \param backtrace   result of running backtrace symbols offset
+void addr2line(trace_info_t *info, char *backtrace);
 
 // TODO: add documentation
 void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match);
