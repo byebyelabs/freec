@@ -59,10 +59,11 @@ void *malloc(size_t size) {
   }
 
   // make virtual page
-  void *v_page_start = mremap((uint8_t *)u_page_start + offset, 0,
+  void *v_page_start = mremap((uint8_t *)u_page_start, 0,
                               get_page_size(), MREMAP_MAYMOVE);
   if (v_page_start == MAP_FAILED) {
     log_message("!! Failed to make virtual address!", ERROR);
+    exit(EXIT_FAILURE);
   }
 
   // construct virtual address
