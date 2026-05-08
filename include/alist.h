@@ -38,8 +38,14 @@ typedef struct alloc_node {
 // \param event_type   the event type to record
 void _fill_trace_info(trace_info_t *info, trace_event_t event_type);
 
+// Dumps error information for the given node 
+// \param node            pointer to the node for which to dump error info
+// \param violation_type  type of memory violation
+void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type);
+
 // Dumps error information for the given node and exits with EXIT_FAILURE
-// \param node        pointer to the node for which to dump error info
+// \param node            pointer to the node for which to dump error info
+// \param violation_type  type of memory violation
 void _dump_error_info_and_exit(alloc_node_t *node,
                                memory_violation_t violation_type);
 

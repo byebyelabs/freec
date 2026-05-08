@@ -1,3 +1,4 @@
+#include <cstdlib>
 #define _GNU_SOURCE
 
 #include <execinfo.h>
@@ -73,8 +74,7 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   real_free(funcNames);
 }
 
-void _dump_error_info_and_exit(alloc_node_t *node,
-                               memory_violation_t violation_type) {
+void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   if (node == NULL) {
     return;
   }
@@ -144,12 +144,15 @@ void _dump_error_info_and_exit(alloc_node_t *node,
   }
 
   _pretty_print_trace(&violator, violation_meaning, '^');
-
-  // crash
-  real_exit(EXIT_FAILURE);
 }
 
-int TMP = 0;
+void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_type) {
+    _dump_error_info(node, violation_type);
+
+    // crash
+    exit(EXIT_FAILURE);
+}
+
 void addr2line(trace_info_t *info, char *backtrace) {
   log_message("[tracing] addr2line called on ", DEBUG);
   log_message(backtrace, DEBUG);
