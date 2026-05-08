@@ -212,10 +212,10 @@ void addr2line(trace_info_t *info, char *backtrace) {
 
     info->line = atoi(fp+1);
     
-    log_message("[tracing]: file path received by addr2line: ", ERROR);
-    log_message(info->file_path, ERROR);
-    log_message(" and line: ", ERROR);
-    log_message(fp+1, ERROR);
+    log_message("[tracing]: file path received by addr2line: ", DEBUG);
+    log_message(info->file_path, DEBUG);
+    log_message(" and line: ", DEBUG);
+    log_message(fp+1, DEBUG);
   }
 }
 
