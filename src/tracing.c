@@ -153,10 +153,17 @@ void addr2line(trace_info_t *info, char *backtrace) {
   *backtrace = '\0';
   backtrace += 2;
 
-  char *offset = backtrace;
+  char *foffset = backtrace; // fake offset
   while (*backtrace != ')')
     backtrace++;
   *backtrace = '\0';
+
+  // foffset is the the instruction right after the call
+  // need to step back one byte
+  char offset[32];
+  // Citation: https://stackoverflow.com/a/77424985
+  unsigned long off = strtoull(foffset, NULL, 16) - 1;
+  snprintf(offset, sizeof(offset), "0x%lx", off);
 
   // FOSNP: fear of snprintf
   log_message("[tracing] addr2line obj_loc: ", DEBUG);
