@@ -1,4 +1,3 @@
-#include <cstdlib>
 #define _GNU_SOURCE
 
 #include <execinfo.h>
@@ -82,7 +81,7 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   trace_info_t violator;
   // violation can only occur when user defers or frees
   trace_event_t user_action =
-      (USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE;
+      (violation_type == USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE;
   _fill_trace_info(&violator, user_action);
 
   // Rust style error dumping kind of like follows
