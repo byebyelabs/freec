@@ -279,6 +279,10 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
     log_message(" ", ERROR);
 
   // then print trimmed_line_len highlights
+  // some highlights get a special color
+  if (highlight == '^') log_message(RED_TEXT_START, ERROR);
+  if (highlight == '-') log_message(BLUE_TEXT_START, ERROR);
+  
   snprintf(str, 2, "%c", highlight);
   while (trimmed_line_len--)
     log_message(str, ERROR);
@@ -286,6 +290,8 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
 
   // finally print the error message
   log_message(message, ERROR);
+
+  if (highlight == '^' || highlight == '-') log_message(COLORED_TEXT_END, ERROR);
 
   // whitespace and then "...\n"
   log_message("\n", ERROR);
