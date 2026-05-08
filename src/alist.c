@@ -58,6 +58,8 @@ void add_deref_event(void *mem_ptr) {
 }
 
 void add_freed_event(void *mem_ptr) {
+  log_message("[freed-event]: add_freed_event called\n", DEBUG);
+
   // check if node exists
   alloc_node_t *node = NULL;
   _find_node(mem_ptr, &node, true);

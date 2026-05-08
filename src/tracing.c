@@ -74,6 +74,7 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
 }
 
 void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
+  log_message("[tracing]: _dump_error_info called\n", DEBUG);
   if (node == NULL) {
     return;
   }
@@ -155,7 +156,7 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
     _dump_error_info(node, violation_type);
 
     // crash
-    exit(EXIT_FAILURE);
+    real_exit(EXIT_FAILURE);
 }
 
 void addr2line(trace_info_t *info, char *backtrace) {
