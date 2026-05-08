@@ -15,6 +15,7 @@ typedef enum {
   USE_BEFORE_MALLOC,
   USE_AFTER_FREE,
   INVALID_FREE,
+  FREE_NON_HEAP_MEM,
   DOUBLE_FREE,
   DANGLING_PTR
 } memory_violation_t;

@@ -75,9 +75,6 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
 
 void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   log_message("[tracing]: _dump_error_info called\n", DEBUG);
-  if (node == NULL) {
-    return;
-  }
 
   trace_info_t violator;
   // violation can only occur when user defers or frees
@@ -119,18 +116,23 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   sprintf(tmp_ln_to_str, ":%d\n", violator.line);
   log_message(tmp_ln_to_str, ERROR);
 
+  if (node == NULL) {
+    // user attempted to free non-heap memory
+    violation_type = FREE_NON_HEAP_MEM;
+  }
+
   // if USE_AFTER_FREE or DOUBLE_FREE or DANGLING_PTR, print where malloc-ed
   if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE || violation_type == DANGLING_PTR)
     _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
 
-  // print last event if not DANGLING_PTR
+  // print last event if not DANGLING_PTR and not FREE_NON_HEAP_MEM
   char *last_event_meaning;
   if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
     last_event_meaning = "correctly freed here";
   else
     last_event_meaning = "last memory access here";
 
-  if (violation_type != DANGLING_PTR)
+  if (violation_type != DANGLING_PTR && violation_type != FREE_NON_HEAP_MEM)
     _pretty_print_trace(&node->last_event, last_event_meaning, '-');
 
   // print violation
@@ -139,7 +141,7 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
     violation_meaning = "first derefence after free";
   else if (violation_type == DOUBLE_FREE)
     violation_meaning = "second free occurred here";
-  else if (violation_type == INVALID_FREE)
+  else if (violation_type == INVALID_FREE || violation_type == FREE_NON_HEAP_MEM)
     violation_meaning = "attempting to free non-malloc-ed memory here";
   else if (violation_type == DANGLING_PTR)
     violation_meaning = "exit happens here before free";
