@@ -10,12 +10,13 @@
 #define MAX_PATH_BUFF 256 /* including \0 */
 
 typedef int ln_num_t;
-typedef enum { ALLOC, FREE, DEREF } trace_event_t;
+typedef enum { ALLOC, FREE, DEREF, EXITING } trace_event_t;
 typedef enum {
   USE_BEFORE_MALLOC,
   USE_AFTER_FREE,
   INVALID_FREE,
-  DOUBLE_FREE
+  DOUBLE_FREE,
+  DANGLING_PTR
 } memory_violation_t;
 
 typedef struct {

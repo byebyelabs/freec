@@ -81,7 +81,8 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   trace_info_t violator;
   // violation can only occur when user defers or frees
   trace_event_t user_action =
-      (violation_type == USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE;
+      (violation_type == DANGLING_PTR) ? EXITING :
+      ((violation_type == USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE);
   _fill_trace_info(&violator, user_action);
 
   // Rust style error dumping kind of like follows
@@ -106,6 +107,8 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
     log_message(RED_MSG("cannot free memory that is not malloc-ed\n"), ERROR);
   } else if (violation_type == DOUBLE_FREE) {
     log_message(RED_MSG("cannot free the same memory more than once\n"), ERROR);
+  } else if (violation_type == DANGLING_PTR) {
+    log_message(RED_MSG("need to free before exiting\n"), ERROR);
   }
 
   // file where violation occured
@@ -115,18 +118,19 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   sprintf(tmp_ln_to_str, ":%d\n", violator.line);
   log_message(tmp_ln_to_str, ERROR);
 
-  // if USE_AFTER_FREE or DOUBLE_FREE, print where malloc-ed
-  if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
+  // if USE_AFTER_FREE or DOUBLE_FREE or DANGLING_PTR, print where malloc-ed
+  if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE || violation_type == DANGLING_PTR)
     _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
 
-  // print last event
+  // print last event if not DANGLING_PTR
   char *last_event_meaning;
   if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
     last_event_meaning = "correctly freed here";
   else
     last_event_meaning = "last memory access here";
 
-  _pretty_print_trace(&node->last_event, last_event_meaning, '-');
+  if (violation_type != DANGLING_PTR)
+    _pretty_print_trace(&node->last_event, last_event_meaning, '-');
 
   // print violation
   char *violation_meaning;
@@ -136,6 +140,8 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
     violation_meaning = "second free occurred here";
   else if (violation_type == INVALID_FREE)
     violation_meaning = "attempting to free non-malloc-ed memory here";
+  else if (violation_type == DANGLING_PTR)
+    violation_meaning = "exit happens here without free";
   else {
     violation_meaning = "impossible code: what is this ??";
     log_message(violation_meaning, ERROR);

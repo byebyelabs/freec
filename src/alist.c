@@ -107,6 +107,14 @@ void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match) {
 
 void check_for_unfreed_memory(void) {
     log_message("[exiting]: check_for_unfreed_memory called\n", DEBUG);
-    
-    return;
+
+    alloc_node_t *root = alloc_list_head;
+    while (root) {
+        if (root->last_event.event != FREE) {
+            _dump_error_info(root, DANGLING_PTR);
+        }
+        root = root->next;
+    }
+
+    real_exit(EXIT_FAILURE);
 }
