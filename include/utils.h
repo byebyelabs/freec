@@ -11,8 +11,15 @@
 typedef void *(*malloc_fn_t)(size_t size);
 typedef void (*free_fn_t)(void *ptr);
 
+typedef void (*exit_fn_t)(int status);
+typedef void (*abort_fn_t)(void);
+
 void *real_malloc(size_t size);
 void real_free(void *ptr);
+
+void real_exit(int status);
+void real__Exit(int status);
+void real_abort();
 
 /**
  * Print a message directly to standard error without invoking malloc or free.

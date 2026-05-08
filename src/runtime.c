@@ -4,6 +4,8 @@
 #include "alist.h"
 #include "utils.h"
 
+// #include <stdlib.h>
+
 // TODO: make it possible to have more pages
 /**
  * underlying page
@@ -86,4 +88,32 @@ void free(void *ptr) {
   sprintf(buffer, "valid free of %p!\n", ptr);
   log_message(buffer, DEBUG);
   mprotect(ptr, get_page_size(), PROT_NONE);
+}
+
+// ---- EXIT HANDLING -------------------------------
+void exit(int status) {
+    check_for_unfreed_memory();
+    real_exit(status);
+
+    // to avoid compiler warning since this 
+    // function has a [[noreturn]] attribute
+    while(true) {}
+}
+
+void _Exit(int status) {
+    check_for_unfreed_memory();
+    real__Exit(status);
+
+    // to avoid compiler warning since this 
+    // function has a [[noreturn]] attribute
+    while(true) {}
+}
+
+void abort(void) {
+    check_for_unfreed_memory();
+    real_abort();
+
+    // to avoid compiler warning since this 
+    // function has a [[noreturn]] attribute
+    while(true) {}
 }

@@ -58,3 +58,39 @@ void real_free(void *ptr) {
 
   real_fn(ptr);
 }
+
+void real_exit(int status) {
+    static exit_fn_t real_fn = NULL;
+    if (real_fn == NULL) {
+      real_fn = (exit_fn_t)dlsym(RTLD_NEXT, "exit");
+      if (real_fn == NULL) {
+        fprintf(stderr, "Failed to locate exit: %s\n", dlerror());
+      }
+    }
+  
+    real_fn(status);
+}
+
+void real__Exit(int status) {
+    static exit_fn_t real_fn = NULL;
+    if (real_fn == NULL) {
+      real_fn = (exit_fn_t)dlsym(RTLD_NEXT, "_Exit");
+      if (real_fn == NULL) {
+        fprintf(stderr, "Failed to locate _Exit: %s\n", dlerror());
+      }
+    }
+  
+    real_fn(status);
+}
+
+void real_abort() {
+    static abort_fn_t real_fn = NULL;
+    if (real_fn == NULL) {
+      real_fn = (abort_fn_t)dlsym(RTLD_NEXT, "abort");
+      if (real_fn == NULL) {
+        fprintf(stderr, "Failed to locate abort: %s\n", dlerror());
+      }
+    }
+  
+    real_fn();
+}

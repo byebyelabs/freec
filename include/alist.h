@@ -67,4 +67,6 @@ void add_deref_event(void *mem_ptr);
 //  - LAST EVENT == "FREE": "double free"
 void add_freed_event(void *mem_ptr);
 
+void check_for_unfreed_memory(void);
+
 #endif

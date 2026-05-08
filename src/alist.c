@@ -104,3 +104,7 @@ void _find_node(void *mem_ptr, alloc_node_t **node, bool exact_match) {
   }
   pthread_mutex_unlock(&alloc_list_mutex);
 }
+
+void check_for_unfreed_memory(void) {
+    return;
+}
