@@ -115,7 +115,7 @@ void _dump_error_info_and_exit(alloc_node_t *node,
   if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE)
     last_event_meaning = "correctly freed here";
   else
-    last_event_meaning = "last dereference here";
+    last_event_meaning = "last memory access here";
 
   _pretty_print_trace(&node->last_event, last_event_meaning, '-');
 
