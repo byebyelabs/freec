@@ -17,7 +17,7 @@
 
 void _pretty_print_trace(trace_info_t *info, char *message, char highlight);
 
-void _fill_trace_info(trace_info_t *info, trace_event_t event_type, int is_violation) {
+void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   log_message("[tracing]: _fill_trace_info called\n", DEBUG);
   if (info == NULL) {
     log_message("[tracing]: should be unreachable! info is `null`\n", ERROR);
@@ -47,7 +47,7 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type, int is_viola
   if (funcNames == NULL) {
     return;
   }
-  addr2line(info, funcNames[USER_CODE_LOCATION_IN_TRACE + is_violation]);
+  addr2line(info, funcNames[USER_CODE_LOCATION_IN_TRACE]);
 
   unset_route_custom_malloc_to_real_malloc();
 
@@ -73,7 +73,7 @@ void _dump_error_info_and_exit(alloc_node_t *node,
   // violation can only occur when user defers or frees
   trace_event_t user_action =
       (USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE;
-  _fill_trace_info(&violator, user_action, 1);
+  _fill_trace_info(&violator, user_action);
 
   // Rust style error dumping kind of like follows
   /*

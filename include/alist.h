@@ -36,8 +36,7 @@ typedef struct alloc_node {
 // source location
 // \param info         pointer to the trace_info_t to populate
 // \param event_type   the event type to record
-// \param is_violation is this the violation statement
-void _fill_trace_info(trace_info_t *info, trace_event_t event_type, int is_violation);
+void _fill_trace_info(trace_info_t *info, trace_event_t event_type);
 
 // Dumps error information for the given node and exits with EXIT_FAILURE
 // \param node        pointer to the node for which to dump error info
