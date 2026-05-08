@@ -30,7 +30,7 @@ void log_message(char *message, severity_t severity) {
     // Write failed. Try to write an error message, then exit
     char fail_msg[] = "logging failed\n";
     write(STDERR_FILENO, fail_msg, sizeof(fail_msg));
-    exit(2);
+    real_exit(2);
   }
 }
 
@@ -83,7 +83,7 @@ void real__Exit(int status) {
     real_fn(status);
 }
 
-void real_abort() {
+void real_abort(void) {
     static abort_fn_t real_fn = NULL;
     if (real_fn == NULL) {
       real_fn = (abort_fn_t)dlsym(RTLD_NEXT, "abort");

@@ -15,7 +15,7 @@ void add_alloc_event(void *mem_ptr, size_t block_sz) {
   alloc_node_t *new_node = real_malloc(sizeof(alloc_node_t));
   if (new_node == NULL) {
     log_message("Failed Allocating Memory in add_alloc_event!\n", ERROR);
-    exit(1);
+    real_exit(EXIT_FAILURE);
   }
 
   // initialize node
