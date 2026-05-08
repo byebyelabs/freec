@@ -239,7 +239,7 @@ void addr2line(trace_info_t *info, char *backtrace) {
 void _print_file_line(char *path, int line, char highlight, char *message) {
   set_route_custom_malloc_to_real_malloc();
   FILE *file = fopen(path, "r");
-  int leading_white_space = MAX_LINE_NUM_DIGITS - 2, trimmed_line_len = 0;
+  int leading_white_space = MAX_LINE_NUM_DIGITS, trimmed_line_len = 0;
 
   line -= 1; // file lines are 1-indexed
   while (line) {
@@ -248,8 +248,7 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
   }
 
   // skip leading white space
-  while (fgetc(file) == ' ')
-    leading_white_space++;
+  while (fgetc(file) == ' ');
 
   // first char was skipped
   fseek(file, -1, SEEK_CUR);
