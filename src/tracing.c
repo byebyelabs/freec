@@ -13,7 +13,6 @@
 
 #define TRACE_DEPTH 32
 #define MAX_LINE_NUM_DIGITS 7
-#define USER_CODE_LOCATION_IN_TRACE 3
 
 void _pretty_print_trace(trace_info_t *info, char *message, char highlight);
 
@@ -47,8 +46,19 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   if (funcNames == NULL) {
     return;
   }
-  addr2line(info, funcNames[USER_CODE_LOCATION_IN_TRACE]);
 
+  // Pick the first frame that is outside our .so and is not invalid
+  char *so_path = getenv("LD_PRELOAD");
+  for (size_t i = 0; i < count; i++){
+    info->line = 0;
+    info->file_path[0] = '\0';
+      
+    // Citation: https://man7.org/linux/man-pages/man3/strstr.3.html
+    if (strstr(so_path, funcNames[i]) != NULL) continue;
+    addr2line(info, funcNames[i]);
+
+    if (info->line != 0) break;
+  }
   unset_route_custom_malloc_to_real_malloc();
 
   // line number should not be more than 15 digits
