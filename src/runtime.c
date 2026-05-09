@@ -4,8 +4,6 @@
 #include "alist.h"
 #include "utils.h"
 
-// #include <stdlib.h>
-
 // TODO: make it possible to have more pages
 /**
  * underlying page
@@ -24,7 +22,8 @@ void unset_route_custom_malloc_to_real_malloc(void) {
 }
 
 // ---- SIGNAL HANDLING -----------------------------
-__attribute__((constructor)) void init() {
+__attribute__((constructor)) void init(void) {
+  atexit(check_for_unfreed_memory);
   struct sigaction sa;
   memset(&sa, 0, sizeof(struct sigaction));
   sa.sa_sigaction = protected_page_access_handler;
