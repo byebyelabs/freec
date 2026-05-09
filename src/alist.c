@@ -2,6 +2,7 @@
 #include "utils.h"
 
 #include <pthread.h>
+#include <string.h>
 #include <unistd.h>
 
 static alloc_node_t *alloc_list_head = NULL;
@@ -113,8 +114,13 @@ void check_for_unfreed_memory(void) {
   alloc_node_t *root = alloc_list_head;
   while (root) {
     if (root->last_event.event != FREE) {
-      _dump_error_info(root, DANGLING_PTR);
+
+      // printf frees after exit unfortunately
+      if (strstr(root->alloc_info.file_path, "printf") == NULL)
+        _dump_error_info(root, DANGLING_PTR);
     }
     root = root->next;
   }
+
+  real__Exit(EXIT_FAILURE);
 }
