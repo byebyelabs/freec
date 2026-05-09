@@ -19,7 +19,7 @@ void real_free(void *ptr);
 
 void real_exit(int status);
 void real__Exit(int status);
-void real_abort();
+void real_abort(void);
 
 /**
  * Print a message directly to standard error without invoking malloc or free.
