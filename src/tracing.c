@@ -61,6 +61,14 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   }
   unset_route_custom_malloc_to_real_malloc();
 
+  if (info->line == 0 && event_type == EXITING) {
+      // user has exited main, but did not free
+      // note as a special case since we cannot
+      // backtrace into usercode anymore
+      info->line = -1;
+      strcpy(info->file_path, "[EMPTY ON PURPOSE]");
+  }
+
   // line number should not be more than 15 digits
   char tmp_line_num_str[16];
   sprintf(tmp_line_num_str, "%d\n", info->line);
@@ -82,6 +90,13 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
       (violation_type == DANGLING_PTR) ? EXITING :
       ((violation_type == USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE);
   _fill_trace_info(&violator, user_action);
+
+  // if violation is return from main without free-ing, set malloc to violation location
+  bool is_violation_dangling_after_return = user_action == EXITING && violator.line == -1;
+  if (is_violation_dangling_after_return) {
+      violator.line = node->alloc_info.line;
+      strcpy(violator.file_path, node->alloc_info.file_path);
+  }
 
   // Rust style error dumping kind of like follows
   /*
@@ -119,6 +134,12 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   if (node == NULL) {
     // user attempted to free non-heap memory
     violation_type = FREE_NON_HEAP_MEM;
+  }
+
+  // special case
+  if (is_violation_dangling_after_return) {
+      _pretty_print_trace(&node->alloc_info, "malloc-ed here, never freed", '^');
+      return;
   }
 
   // if USE_AFTER_FREE or DOUBLE_FREE or DANGLING_PTR, print where malloc-ed
