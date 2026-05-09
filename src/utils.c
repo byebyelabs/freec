@@ -60,25 +60,25 @@ void real_free(void *ptr) {
 }
 
 void real__Exit(int status) {
-    static exit_fn_t real_fn = NULL;
+  static exit_fn_t real_fn = NULL;
+  if (real_fn == NULL) {
+    real_fn = (exit_fn_t)dlsym(RTLD_NEXT, "_Exit");
     if (real_fn == NULL) {
-      real_fn = (exit_fn_t)dlsym(RTLD_NEXT, "_Exit");
-      if (real_fn == NULL) {
-        fprintf(stderr, "Failed to locate _Exit: %s\n", dlerror());
-      }
+      fprintf(stderr, "Failed to locate _Exit: %s\n", dlerror());
     }
-  
-    real_fn(status);
+  }
+
+  real_fn(status);
 }
 
 void real_abort(void) {
-    static abort_fn_t real_fn = NULL;
+  static abort_fn_t real_fn = NULL;
+  if (real_fn == NULL) {
+    real_fn = (abort_fn_t)dlsym(RTLD_NEXT, "abort");
     if (real_fn == NULL) {
-      real_fn = (abort_fn_t)dlsym(RTLD_NEXT, "abort");
-      if (real_fn == NULL) {
-        fprintf(stderr, "Failed to locate abort: %s\n", dlerror());
-      }
+      fprintf(stderr, "Failed to locate abort: %s\n", dlerror());
     }
-  
-    real_fn();
+  }
+
+  real_fn();
 }

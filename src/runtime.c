@@ -60,8 +60,8 @@ void *malloc(size_t size) {
   }
 
   // make virtual page
-  void *v_page_start = mremap((uint8_t *)u_page_start, 0,
-                              get_page_size(), MREMAP_MAYMOVE);
+  void *v_page_start =
+      mremap((uint8_t *)u_page_start, 0, get_page_size(), MREMAP_MAYMOVE);
   if (v_page_start == MAP_FAILED) {
     log_message("!! Failed to make virtual address!", ERROR);
     real__Exit(EXIT_FAILURE);
@@ -91,28 +91,31 @@ void free(void *ptr) {
 
 // ---- EXIT HANDLING -------------------------------
 void exit(int status) {
-    check_for_unfreed_memory();
-    real__Exit(status);
+  check_for_unfreed_memory();
+  real__Exit(status);
 
-    // to avoid compiler warning since this 
-    // function has a [[noreturn]] attribute
-    while(true) {}
+  // to avoid compiler warning since this
+  // function has a [[noreturn]] attribute
+  while (true) {
+  }
 }
 
 void _Exit(int status) {
-    check_for_unfreed_memory();
-    real__Exit(status);
+  check_for_unfreed_memory();
+  real__Exit(status);
 
-    // to avoid compiler warning since this 
-    // function has a [[noreturn]] attribute
-    while(true) {}
+  // to avoid compiler warning since this
+  // function has a [[noreturn]] attribute
+  while (true) {
+  }
 }
 
 void abort(void) {
-    check_for_unfreed_memory();
-    real_abort();
+  check_for_unfreed_memory();
+  real_abort();
 
-    // to avoid compiler warning since this 
-    // function has a [[noreturn]] attribute
-    while(true) {}
+  // to avoid compiler warning since this
+  // function has a [[noreturn]] attribute
+  while (true) {
+  }
 }

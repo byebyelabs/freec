@@ -49,24 +49,26 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
 
   // Pick the first frame that is outside our .so and is not invalid
   char *so_path = getenv("LD_PRELOAD");
-  for (size_t i = 0; i < count; i++){
+  for (size_t i = 0; i < count; i++) {
     info->line = 0;
     info->file_path[0] = '\0';
-      
+
     // Citation: https://man7.org/linux/man-pages/man3/strstr.3.html
-    if (strstr(so_path, funcNames[i]) != NULL) continue;
+    if (strstr(so_path, funcNames[i]) != NULL)
+      continue;
     addr2line(info, funcNames[i]);
 
-    if (info->line != 0) break;
+    if (info->line != 0)
+      break;
   }
   unset_route_custom_malloc_to_real_malloc();
 
   if (info->line == 0 && event_type == EXITING) {
-      // user has exited main, but did not free
-      // note as a special case since we cannot
-      // backtrace into usercode anymore
-      info->line = -1;
-      strcpy(info->file_path, "[EMPTY ON PURPOSE]");
+    // user has exited main, but did not free
+    // note as a special case since we cannot
+    // backtrace into usercode anymore
+    info->line = -1;
+    strcpy(info->file_path, "[EMPTY ON PURPOSE]");
   }
 
   // line number should not be more than 15 digits
@@ -86,16 +88,21 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
 
   trace_info_t violator;
   // violation can only occur when user defers or frees
-  trace_event_t user_action =
-      (violation_type == DANGLING_PTR) ? EXITING :
-      ((violation_type == USE_AFTER_FREE || violation_type == USE_BEFORE_MALLOC) ? DEREF : FREE);
+  trace_event_t user_action = (violation_type == DANGLING_PTR)
+                                  ? EXITING
+                                  : ((violation_type == USE_AFTER_FREE ||
+                                      violation_type == USE_BEFORE_MALLOC)
+                                         ? DEREF
+                                         : FREE);
   _fill_trace_info(&violator, user_action);
 
-  // if violation is return from main without free-ing, set malloc to violation location
-  bool is_violation_dangling_after_return = user_action == EXITING && violator.line == -1;
+  // if violation is return from main without free-ing, set malloc to violation
+  // location
+  bool is_violation_dangling_after_return =
+      user_action == EXITING && violator.line == -1;
   if (is_violation_dangling_after_return) {
-      violator.line = node->alloc_info.line;
-      strcpy(violator.file_path, node->alloc_info.file_path);
+    violator.line = node->alloc_info.line;
+    strcpy(violator.file_path, node->alloc_info.file_path);
   }
 
   // Rust style error dumping kind of like follows
@@ -138,12 +145,13 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
 
   // special case
   if (is_violation_dangling_after_return) {
-      _pretty_print_trace(&node->alloc_info, "malloc-ed here, never freed", '^');
-      return;
+    _pretty_print_trace(&node->alloc_info, "malloc-ed here, never freed", '^');
+    return;
   }
 
   // if USE_AFTER_FREE or DOUBLE_FREE or DANGLING_PTR, print where malloc-ed
-  if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE || violation_type == DANGLING_PTR)
+  if (violation_type == USE_AFTER_FREE || violation_type == DOUBLE_FREE ||
+      violation_type == DANGLING_PTR)
     _pretty_print_trace(&node->alloc_info, "malloc happened here", '-');
 
   // print last event if not DANGLING_PTR and not FREE_NON_HEAP_MEM
@@ -162,7 +170,8 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
     violation_meaning = "first derefence after free";
   else if (violation_type == DOUBLE_FREE)
     violation_meaning = "second free occurred here";
-  else if (violation_type == INVALID_FREE || violation_type == FREE_NON_HEAP_MEM)
+  else if (violation_type == INVALID_FREE ||
+           violation_type == FREE_NON_HEAP_MEM)
     violation_meaning = "attempting to free non-malloc-ed memory here";
   else if (violation_type == DANGLING_PTR)
     violation_meaning = "exited here before free-ing";
@@ -175,11 +184,12 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   _pretty_print_trace(&violator, violation_meaning, '^');
 }
 
-void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_type) {
-    _dump_error_info(node, violation_type);
+void _dump_error_info_and_exit(alloc_node_t *node,
+                               memory_violation_t violation_type) {
+  _dump_error_info(node, violation_type);
 
-    // crash
-    real__Exit(EXIT_FAILURE);
+  // crash
+  real__Exit(EXIT_FAILURE);
 }
 
 void addr2line(trace_info_t *info, char *backtrace) {
@@ -232,7 +242,7 @@ void addr2line(trace_info_t *info, char *backtrace) {
 
     // print to pipefd instead of STDOUT
     // Citation: https://man7.org/linux/man-pages/man2/dup.2.html
-    dup2(pipefd[1],STDOUT_FILENO);
+    dup2(pipefd[1], STDOUT_FILENO);
 
     // addr2line should run with regular malloc
     unsetenv("LD_PRELOAD");
@@ -256,15 +266,16 @@ void addr2line(trace_info_t *info, char *backtrace) {
 
     // replace ':' with '\0'
     char *fp = info->file_path;
-    while (*fp != ':') fp++;
+    while (*fp != ':')
+      fp++;
     *fp = '\0';
 
-    info->line = atoi(fp+1);
-    
+    info->line = atoi(fp + 1);
+
     log_message("[tracing]: file path received by addr2line: ", DEBUG);
     log_message(info->file_path, DEBUG);
     log_message(" and line: ", DEBUG);
-    log_message(fp+1, DEBUG);
+    log_message(fp + 1, DEBUG);
   }
 }
 
@@ -280,7 +291,8 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
   }
 
   // skip leading white space
-  while (fgetc(file) == ' ');
+  while (fgetc(file) == ' ')
+    ;
 
   // first char was skipped
   fseek(file, -1, SEEK_CUR);
@@ -301,9 +313,11 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
 
   // then print trimmed_line_len highlights
   // some highlights get a special color
-  if (highlight == '^') log_message(RED_TEXT_START, ERROR);
-  if (highlight == '-') log_message(BLUE_TEXT_START, ERROR);
-  
+  if (highlight == '^')
+    log_message(RED_TEXT_START, ERROR);
+  if (highlight == '-')
+    log_message(BLUE_TEXT_START, ERROR);
+
   snprintf(str, 2, "%c", highlight);
   while (trimmed_line_len--)
     log_message(str, ERROR);
@@ -312,7 +326,8 @@ void _print_file_line(char *path, int line, char highlight, char *message) {
   // finally print the error message
   log_message(message, ERROR);
 
-  if (highlight == '^' || highlight == '-') log_message(COLORED_TEXT_END, ERROR);
+  if (highlight == '^' || highlight == '-')
+    log_message(COLORED_TEXT_END, ERROR);
 
   // whitespace and then "...\n"
   log_message("\n", ERROR);
