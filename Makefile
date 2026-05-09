@@ -28,7 +28,7 @@ all:
 
 setup:
 	@make all
-	@echo "alias freec='$(shell pwd)/$(BUILD_DIR)/$(LIB).so'" >> ~/.bash_rc
+	@echo "alias freec='$(shell pwd)/$(BUILD_DIR)/$(LIB).so'" >> ~/.bashrc
 
 tests:
 	@python3 tests "tests/*.c"
