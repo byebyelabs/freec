@@ -165,7 +165,7 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   else if (violation_type == INVALID_FREE || violation_type == FREE_NON_HEAP_MEM)
     violation_meaning = "attempting to free non-malloc-ed memory here";
   else if (violation_type == DANGLING_PTR)
-    violation_meaning = "exit happens here before free";
+    violation_meaning = "exited here before free-ing";
   else {
     violation_meaning = "impossible code: what is this ??";
     log_message(violation_meaning, ERROR);
