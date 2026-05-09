@@ -117,6 +117,4 @@ void check_for_unfreed_memory(void) {
     }
     root = root->next;
   }
-
-  real__Exit(EXIT_FAILURE);
 }

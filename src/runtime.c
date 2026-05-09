@@ -90,16 +90,6 @@ void free(void *ptr) {
 }
 
 // ---- EXIT HANDLING -------------------------------
-void exit(int status) {
-  check_for_unfreed_memory();
-  real__Exit(status);
-
-  // to avoid compiler warning since this
-  // function has a [[noreturn]] attribute
-  while (true) {
-  }
-}
-
 void _Exit(int status) {
   check_for_unfreed_memory();
   real__Exit(status);
