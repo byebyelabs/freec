@@ -30,7 +30,7 @@ void log_message(char *message, severity_t severity) {
     // Write failed. Try to write an error message, then exit
     char fail_msg[] = "logging failed\n";
     write(STDERR_FILENO, fail_msg, sizeof(fail_msg));
-    real_exit(2);
+    real__Exit(2);
   }
 }
 
@@ -57,18 +57,6 @@ void real_free(void *ptr) {
   }
 
   real_fn(ptr);
-}
-
-void real_exit(int status) {
-    static exit_fn_t real_fn = NULL;
-    if (real_fn == NULL) {
-      real_fn = (exit_fn_t)dlsym(RTLD_NEXT, "exit");
-      if (real_fn == NULL) {
-        fprintf(stderr, "Failed to locate exit: %s\n", dlerror());
-      }
-    }
-  
-    real_fn(status);
 }
 
 void real__Exit(int status) {

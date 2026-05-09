@@ -17,7 +17,6 @@ typedef void (*abort_fn_t)(void);
 void *real_malloc(size_t size);
 void real_free(void *ptr);
 
-void real_exit(int status);
 void real__Exit(int status);
 void real_abort(void);
 

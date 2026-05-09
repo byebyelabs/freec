@@ -32,7 +32,7 @@ __attribute__((constructor)) void init() {
 
   if (sigaction(SIGSEGV, &sa, NULL) != 0) {
     log_message("!! sigaction failed", ERROR);
-    real_exit(EXIT_FAILURE);
+    real__Exit(EXIT_FAILURE);
   }
 }
 
@@ -56,7 +56,7 @@ void *malloc(size_t size) {
                         MAP_ANONYMOUS | MAP_SHARED, -1, 0);
     if (u_page_start == MAP_FAILED) {
       log_message("!! Failed to mmap underlying page!", ERROR);
-      real_exit(EXIT_FAILURE);
+      real__Exit(EXIT_FAILURE);
     }
   }
 
@@ -65,7 +65,7 @@ void *malloc(size_t size) {
                               get_page_size(), MREMAP_MAYMOVE);
   if (v_page_start == MAP_FAILED) {
     log_message("!! Failed to make virtual address!", ERROR);
-    real_exit(EXIT_FAILURE);
+    real__Exit(EXIT_FAILURE);
   }
 
   // construct virtual address
@@ -93,7 +93,7 @@ void free(void *ptr) {
 // ---- EXIT HANDLING -------------------------------
 void exit(int status) {
     check_for_unfreed_memory();
-    real_exit(status);
+    real__Exit(status);
 
     // to avoid compiler warning since this 
     // function has a [[noreturn]] attribute

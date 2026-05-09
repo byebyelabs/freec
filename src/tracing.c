@@ -20,7 +20,7 @@ void _fill_trace_info(trace_info_t *info, trace_event_t event_type) {
   log_message("[tracing]: _fill_trace_info called\n", DEBUG);
   if (info == NULL) {
     log_message("[tracing]: should be unreachable! info is `null`\n", ERROR);
-    real_exit(EXIT_FAILURE);
+    real__Exit(EXIT_FAILURE);
   }
 
   info->event = event_type;
@@ -148,7 +148,7 @@ void _dump_error_info(alloc_node_t *node, memory_violation_t violation_type) {
   else {
     violation_meaning = "impossible code: what is this ??";
     log_message(violation_meaning, ERROR);
-    real_exit(EXIT_FAILURE);
+    real__Exit(EXIT_FAILURE);
   }
 
   _pretty_print_trace(&violator, violation_meaning, '^');
@@ -158,7 +158,7 @@ void _dump_error_info_and_exit(alloc_node_t *node, memory_violation_t violation_
     _dump_error_info(node, violation_type);
 
     // crash
-    real_exit(EXIT_FAILURE);
+    real__Exit(EXIT_FAILURE);
 }
 
 void addr2line(trace_info_t *info, char *backtrace) {
@@ -202,7 +202,7 @@ void addr2line(trace_info_t *info, char *backtrace) {
   pid_t child_pid = fork();
   if (child_pid == -1) {
     log_message("[tracing] fork failed in addr2line", ERROR);
-    real_exit(EXIT_FAILURE);
+    real__Exit(EXIT_FAILURE);
   }
 
   if (child_pid == 0) {
@@ -218,11 +218,11 @@ void addr2line(trace_info_t *info, char *backtrace) {
     char *a2l_args[] = {"addr2line", "-e", obj_loc, "-i", offset, NULL};
     if (execvp("addr2line", a2l_args)) {
       log_message("[tracing]: execvp failed\n", ERROR);
-      real_exit(EXIT_FAILURE);
+      real__Exit(EXIT_FAILURE);
     }
 
     // end child process
-    real_exit(EXIT_SUCCESS);
+    real__Exit(EXIT_SUCCESS);
   } else {
     // Parent process: wait for child then copy result to info
     wait(NULL);
