@@ -29,6 +29,8 @@ all:
 setup:
 	@make all
 	@echo "alias freec=LD_PRELOAD='$(shell pwd)/$(BUILD_DIR)/$(LIB).so'" >> ~/.bashrc
+	@source ~/.bashrc
+	
 
 tests:
 	@python3 tests "tests/*.c"
