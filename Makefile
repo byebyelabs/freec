@@ -1,4 +1,4 @@
-.PHONY: all clean tests
+.PHONY: all clean tests setup
 
 CC        = clang
 
@@ -25,6 +25,10 @@ export LIB
 all:
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -shared -fPIC -o $(BUILD_DIR)/$(LIB).so $(BUILD_SRC) -ldl
+
+setup:
+	@make all
+	@echo "alias freec='$(shell pwd)/$(BUILD_DIR)/$(LIB).so'" >> ~/.bash_rc
 
 tests:
 	@python3 tests "tests/*.c"
