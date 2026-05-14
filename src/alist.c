@@ -115,9 +115,10 @@ void check_for_unfreed_memory(void) {
   while (root) {
     if (root->last_event.event != FREE) {
 
-      // printf frees after exit unfortunately
+      // printf & scanf free lazily after exit unfortunately
       if (strstr(root->alloc_info.file_path, "printf") == NULL)
-        _dump_error_info(root, DANGLING_PTR);
+        if (strstr(root->alloc_info.file_path, "scanf") == NULL)
+          _dump_error_info(root, DANGLING_PTR);
     }
     root = root->next;
   }
